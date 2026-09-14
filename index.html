@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智享星球 | AI零售消费应用平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:.8} 50%{transform:scale(1.05);opacity:1} }
+        @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes barGrow { from{width:0} }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .bubble { position: fixed; border-radius: 50%; filter: blur(60px); z-index: 0; animation: float 6s ease-in-out infinite; }
+        .bubble-1 { width:300px;height:300px;background:rgba(255,107,107,.12);top:10%;left:-5%; }
+        .bubble-2 { width:400px;height:400px;background:rgba(78,205,196,.1);top:50%;right:-10%;animation-delay:2s; }
+        .bubble-3 { width:250px;height:250px;background:rgba(255,154,91,.08);bottom:5%;left:30%;animation-delay:4s; }
+
+        /* ========== Navbar ========== */
+        .navbar { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(15,12,41,.7); border-bottom: 1px solid rgba(255,255,255,.08); padding: 16px 0; }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; cursor: pointer; user-select: none; }
+        .logo-icon { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9a9e); display: flex; align-items: center; justify-content: center; font-size: 20px; animation: pulse 3s ease-in-out infinite; }
+        .logo-text { background: linear-gradient(90deg, #feca57, #48dbfb, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .nav-back { display: none; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,.1); color: #feca57; font-size: 14px; cursor: pointer; transition: background .3s; border: none; }
+        .nav-back:hover { background: rgba(255,255,255,.15); }
+        .nav-back.show { display: flex; }
+
+        /* ========== Views ========== */
+        .view { display: none; position: relative; z-index: 1; }
+        .view.active { display: block; animation: fadeInUp .4s ease; }
+
+        /* ========== Home View ========== */
+        .hero { text-align: center; padding: 60px 24px 40px; max-width: 800px; margin: 0 auto; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: 30px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); font-size: 14px; color: #feca57; margin-bottom: 24px; animation: fadeInUp .8s ease; }
+        .hero-badge-dot { width:8px;height:8px;border-radius:50%;background:#feca57;animation:pulse 1.5s ease-in-out infinite; }
+        .hero h1 { font-size: 48px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; animation: fadeInUp .8s ease .1s both; }
+        .hero h1 .gradient-text { background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 3s linear infinite; }
+        .hero p { font-size: 16px; color: rgba(255,255,255,.6); line-height: 1.7; animation: fadeInUp .8s ease .2s both; }
+        .hero-stats { display: flex; justify-content: center; gap: 40px; margin-top: 32px; animation: fadeInUp .8s ease .3s both; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #feca57, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-label { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+        .search-bar { max-width: 500px; margin: 0 auto 40px; position: relative; animation: fadeInUp .8s ease .4s both; }
+        .search-input { width: 100%; padding: 14px 24px 14px 48px; border-radius: 30px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.08); color: #fff; font-size: 15px; outline: none; transition: all .3s; }
+        .search-input::placeholder { color: rgba(255,255,255,.4); }
+        .search-input:focus { background: rgba(255,255,255,.12); border-color: rgba(254,202,87,.4); box-shadow: 0 0 20px rgba(254,202,87,.15); }
+        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 18px; color: rgba(255,255,255,.4); }
+
+        .section-title { text-align: center; margin: 40px 0 30px; }
+        .section-title h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .section-title p { color: rgba(255,255,255,.5); font-size: 14px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+
+        .card { position: relative; border-radius: 18px; padding: 28px 24px; text-decoration: none; color: #fff; overflow: hidden; transition: transform .4s cubic-bezier(.175,.885,.32,1.275), box-shadow .4s; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.1); animation: fadeInUp .6s ease both; }
+        .card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 50px rgba(0,0,0,.4); }
+        .card-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; transition: transform .4s; }
+        .card:hover .card-icon { transform: rotate(10deg) scale(1.1); }
+        .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .card p { font-size: 13px; color: rgba(255,255,255,.6); line-height: 1.6; }
+        .card-tag { display: inline-block; margin-top: 12px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .card-arrow { position: absolute; bottom: 24px; right: 24px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all .3s; opacity: 0; }
+        .card:hover .card-arrow { opacity: 1; }
+
+        .card-1 { background: linear-gradient(135deg, rgba(255,107,107,.15), rgba(255,154,91,.1)); }
+        .card-1 .card-icon { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .card-1 .card-tag { background: rgba(255,107,107,.2); color: #ff6b6b; }
+        .card-1 .card-arrow { background: rgba(255,107,107,.3); }
+
+        .card-2 { background: linear-gradient(135deg, rgba(72,219,251,.15), rgba(0,210,255,.1)); }
+        .card-2 .card-icon { background: linear-gradient(135deg, #48dbfb, #00bcd4); }
+        .card-2 .card-tag { background: rgba(72,219,251,.2); color: #48dbfb; }
+        .card-2 .card-arrow { background: rgba(72,219,251,.3); }
+
+        .card-3 { background: linear-gradient(135deg, rgba(155,89,182,.15), rgba(187,143,206,.1)); }
+        .card-3 .card-icon { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .card-3 .card-tag { background: rgba(155,89,182,.2); color: #bb8fce; }
+        .card-3 .card-arrow { background: rgba(155,89,182,.3); }
+
+        .card-4 { background: linear-gradient(135deg, rgba(255,89,143,.15), rgba(255,142,197,.1)); }
+        .card-4 .card-icon { background: linear-gradient(135deg, #ff5990, #ff4757); }
+        .card-4 .card-tag { background: rgba(255,89,143,.2); color: #ff8ec5; }
+        .card-4 .card-arrow { background: rgba(255,89,143,.3); }
+
+        .card-5 { background: linear-gradient(135deg, rgba(29,209,161,.15), rgba(46,204,113,.1)); }
+        .card-5 .card-icon { background: linear-gradient(135deg, #1dd1a1, #10ac84); }
+        .card-5 .card-tag { background: rgba(29,209,161,.2); color: #1dd1a1; }
+        .card-5 .card-arrow { background: rgba(29,209,161,.3); }
+
+        .card-6 { background: linear-gradient(135deg, rgba(95,124,246,.15), rgba(68,97,238,.1)); }
+        .card-6 .card-icon { background: linear-gradient(135deg, #5f7cf6, #4461ee); }
+        .card-6 .card-tag { background: rgba(95,124,246,.2); color: #7d91fa; }
+        .card-6 .card-arrow { background: rgba(95,124,246,.3); }
+
+        .card-7 { background: linear-gradient(135deg, rgba(254,202,87,.15), rgba(255,211,51,.1)); }
+        .card-7 .card-icon { background: linear-gradient(135deg, #feca57, #f1c40f); }
+        .card-7 .card-tag { background: rgba(254,202,87,.2); color: #feca57; }
+        .card-7 .card-arrow { background: rgba(254,202,87,.3); }
+
+        .card-8 { background: linear-gradient(135deg, rgba(255,118,117,.15), rgba(255,159,67,.1)); }
+        .card-8 .card-icon { background: linear-gradient(135deg, #ff7675, #ff6348); }
+        .card-8 .card-tag { background: rgba(255,118,117,.2); color: #ff9fa0; }
+        .card-8 .card-arrow { background: rgba(255,118,117,.3); }
+
+        .card-9 { background: linear-gradient(135deg, rgba(85,239,196,.15), rgba(0,255,170,.1)); }
+        .card-9 .card-icon { background: linear-gradient(135deg, #55efc4, #00d2a8); }
+        .card-9 .card-tag { background: rgba(85,239,196,.2); color: #55efc4; }
+        .card-9 .card-arrow { background: rgba(85,239,196,.3); }
+
+        .card-10 { background: linear-gradient(135deg, rgba(124,95,255,.15), rgba(101,84,255,.1)); }
+        .card-10 .card-icon { background: linear-gradient(135deg, #7c5fff, #6c5ce7); }
+        .card-10 .card-tag { background: rgba(124,95,255,.2); color: #9d87ff; }
+        .card-10 .card-arrow { background: rgba(124,95,255,.3); }
+
+        .card-11 { background: linear-gradient(135deg, rgba(116,185,255,.15), rgba(85,167,255,.1)); }
+        .card-11 .card-icon { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+        .card-11 .card-tag { background: rgba(116,185,255,.2); color: #74b9ff; }
+        .card-11 .card-arrow { background: rgba(116,185,255,.3); }
+
+        .card-12 { background: linear-gradient(135deg, rgba(253,160,133,.15), rgba(255,138,101,.1)); }
+        .card-12 .card-icon { background: linear-gradient(135deg, #fda085, #ff8a65); }
+        .card-12 .card-tag { background: rgba(253,160,133,.2); color: #fda085; }
+        .card-12 .card-arrow { background: rgba(253,160,133,.3); }
+
+        /* ========== Module View Common ========== */
+        .module-view { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+        .module-header { margin-bottom: 32px; }
+        .module-header .m-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; }
+        .module-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .module-header p { font-size: 14px; color: rgba(255,255,255,.55); }
+
+        .panel { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px); }
+        .panel-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .panel-title .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .btn { padding: 10px 24px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .3s; color: #fff; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary { background: linear-gradient(135deg, #feca57, #ff9a3e); }
+        .btn-blue { background: linear-gradient(135deg, #48dbfb, #00bcd4); }
+        .btn-green { background: linear-gradient(135deg, #1dd1a1, #10ac84); }
+        .btn-purple { background: linear-gradient(135deg, #7c5fff, #6c5ce7); }
+        .btn-red { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+        .input-field { width: 100%; padding: 12px 16px; border: 1px solid rgba(255,255,255,.15); border-radius: 10px; background: rgba(255,255,255,.06); color: #fff; font-size: 14px; outline: none; transition: all .3s; }
+        .input-field::placeholder { color: rgba(255,255,255,.35); }
+        .input-field:focus { background: rgba(255,255,255,.1); border-color: rgba(254,202,87,.4); }
+        select.input-field { cursor: pointer; }
+        select.input-field option { background: #2d2b55; }
+        textarea.input-field { resize: vertical; min-height: 80px; font-family: inherit; }
+
+        .label { font-size: 13px; color: rgba(255,255,255,.6); margin-bottom: 6px; display: block; font-weight: 600; }
+
+        .toast { position: fixed; top: 80px; right: 24px; padding: 14px 24px; border-radius: 12px; background: rgba(29,209,161,.95); color: #fff; font-size: 14px; font-weight: 600; z-index: 9999; animation: slideIn .3s ease; display: none; align-items: center; gap: 8px; }
+        .toast.show { display: flex; }
+        .toast.error { background: rgba(255,107,107,.95); }
+
+        /* ========== Smart Store (1) ========== */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .stat-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 20px; }
+        .stat-card .s-label { font-size: 12px; color: rgba(255,255,255,.5); margin-bottom: 8px; }
+        .stat-card .s-value { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+        .stat-card .s-change { font-size: 12px; }
+        .s-up { color: #1dd1a1; }
+        .s-down { color: #ff6b6b; }
+        .bar-chart { margin-top: 16px; }
+        .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .bar-label { width: 100px; font-size: 13px; color: rgba(255,255,255,.6); text-align: right; flex-shrink: 0; }
+        .bar-track { flex: 1; height: 24px; background: rgba(255,255,255,.05); border-radius: 6px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 6px; animation: barGrow 1s ease; }
+        .bar-value { width: 60px; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+        .store-list-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: rgba(255,255,255,.03); border-radius: 10px; margin-bottom: 8px; transition: background .3s; }
+        .store-list-item:hover { background: rgba(255,255,255,.07); }
+        .store-status { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .store-status.open { background: rgba(29,209,161,.2); color: #1dd1a1; }
+        .store-status.closed { background: rgba(255,107,107,.2); color: #ff6b6b; }
+
+        /* ========== Sales Forecast (2) ========== */
+        .forecast-chart { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 20px 0; border-bottom: 2px solid rgba(255,255,255,.1); position: relative; }
+        .forecast-bar { flex: 1; min-width: 0; border-radius: 6px 6px 0 0; position: relative; transition: all .5s; animation: barGrow .8s ease; }
+        .forecast-bar.actual { background: linear-gradient(180deg, #48dbfb, #00bcd4); }
+        .forecast-bar.predicted { background: linear-gradient(180deg, #feca57, #ff9a3e); opacity: .85; border: 2px dashed rgba(255,255,255,.3); border-bottom: none; }
+        .forecast-bar:hover { transform: translateY(-4px); }
+        .forecast-bar .bar-tip { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); font-size: 11px; white-space: nowrap; opacity: 0; transition: opacity .3s; }
+        .forecast-bar:hover .bar-tip { opacity: 1; }
+        .forecast-legend { display: flex; gap: 24px; margin-top: 16px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,.6); }
+        .legend-dot { width: 14px; height: 14px; border-radius: 4px; }
+
+        /* ========== User Behavior (3) ========== */
+        .funnel { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 20px 0; }
+        .funnel-step { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-radius: 10px; width: 100%; transition: transform .3s; animation: barGrow 1s ease; }
+        .funnel-step:hover { transform: scale(1.02); }
+        .funnel-step .f-label { font-weight: 700; font-size: 14px; }
+        .funnel-step .f-value { font-size: 13px; }
+        .funnel-arrow { color: rgba(255,255,255,.3); font-size: 20px; }
+        .heatmap-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); gap: 4px; margin: 16px 0; }
+        .heatmap-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: transform .3s; }
+        .heatmap-cell:hover { transform: scale(1.2); z-index: 1; }
+        .heatmap-header { text-align: center; font-size: 11px; color: rgba(255,255,255,.4); padding: 4px; }
+        .heatmap-label { font-size: 11px; color: rgba(255,255,255,.5); display: flex; align-items: center; }
+
+        .persona-card { display: flex; gap: 20px; align-items: center; padding: 20px; background: rgba(255,255,255,.03); border-radius: 14px; margin-top: 16px; }
+        .persona-avatar { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+        .persona-info h4 { font-size: 15px; margin-bottom: 4px; }
+        .persona-info p { font-size: 13px; color: rgba(255,255,255,.5); }
+        .persona-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .persona-tag { padding: 2px 8px; border-radius: 20px; font-size: 11px; background: rgba(255,255,255,.1); }
+
+        /* ========== Ad Personalization (4) ========== */
+        .ad-preview { border-radius: 14px; overflow: hidden; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); }
+        .ad-creative { padding: 24px; text-align: center; }
+        .ad-creative h4 { font-size: 18px; margin-bottom: 8px; }
+        .ad-creative p { font-size: 13px; color: rgba(255,255,255,.6); margin-bottom: 16px; }
+        .ad-btn { display: inline-block; padding: 10px 24px; border-radius: 24px; font-size: 14px; font-weight: 700; }
+        .tag-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag-chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all .3s; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05); user-select: none; }
+        .tag-chip:hover { background: rgba(255,255,255,.1); }
+        .tag-chip.selected { background: linear-gradient(135deg, #ff5990, #ff4757); border-color: transparent; }
+
+        /* Ad Format Tabs */
+        .ad-format-tabs { display: flex; gap: 0; margin-bottom: 16px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,.12); }
+        .ad-format-tab { flex: 1; padding: 10px 16px; text-align: center; font-size: 13px; cursor: pointer; transition: all .25s; background: rgba(255,255,255,.03); border-right: 1px solid rgba(255,255,255,.08); }
+        .ad-format-tab:last-child { border-right: none; }
+        .ad-format-tab:hover { background: rgba(255,255,255,.07); }
+        .ad-format-tab.active { background: linear-gradient(135deg, #ff5990, #ff4757); font-weight: 700; }
+
+        /* Ad Creative Angles */
+        .ad-angle-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .ad-angle-tab { flex: 1; padding: 8px 12px; text-align: center; font-size: 12px; border-radius: 8px; cursor: pointer; transition: all .25s; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03); }
+        .ad-angle-tab:hover { background: rgba(255,255,255,.08); }
+        .ad-angle-tab.active { font-weight: 700; border-color: transparent; }
+        .ad-angle-tab.active[data-angle="rational"] { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .ad-angle-tab.active[data-angle="emotional"] { background: linear-gradient(135deg, #ff6a88, #ff99ac); }
+        .ad-angle-tab.active[data-angle="promotional"] { background: linear-gradient(135deg, #ffa500, #ff6347); }
+
+        /* Feed Ad Card */
+        .ad-feed-card { border-radius: 14px; overflow: hidden; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+        .ad-feed-visual { height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .ad-feed-visual::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.5)); }
+        .ad-feed-emoji { font-size: 64px; z-index: 1; filter: drop-shadow(0 4px 20px rgba(0,0,0,.3)); }
+        .ad-feed-content { padding: 16px; }
+        .ad-feed-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: 600; }
+        .ad-feed-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; line-height: 1.4; }
+        .ad-feed-sub { font-size: 13px; color: rgba(255,255,255,.65); margin-bottom: 10px; line-height: 1.5; }
+        .ad-feed-points { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .ad-feed-point { font-size: 11px; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,.08); }
+        .ad-feed-bottom { display: flex; align-items: center; justify-content: space-between; }
+        .ad-feed-price { font-size: 22px; font-weight: 800; }
+        .ad-feed-price small { font-size: 12px; font-weight: 400; color: rgba(255,255,255,.5); text-decoration: line-through; margin-left: 6px; }
+        .ad-feed-cta { padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+
+        /* Search Ad */
+        .ad-search-card { border-radius: 10px; overflow: hidden; background: #fff; color: #333; border: 1px solid #e8e8e8; }
+        .ad-search-badge { background: #f0f0f0; color: #888; font-size: 11px; padding: 2px 6px; border-radius: 3px; margin-right: 6px; font-weight: 400; }
+        .ad-search-title { font-size: 16px; color: #1a73e8; margin-bottom: 4px; line-height: 1.4; }
+        .ad-search-title b { color: #d93025; }
+        .ad-search-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 6px; }
+        .ad-search-meta { font-size: 12px; color: #999; }
+
+        /* Banner Ad */
+        .ad-banner-card { border-radius: 14px; overflow: hidden; position: relative; min-height: 120px; display: flex; align-items: center; }
+        .ad-banner-bg { position: absolute; inset: 0; opacity: .95; }
+        .ad-banner-content { position: relative; z-index: 1; padding: 24px; display: flex; align-items: center; gap: 20px; width: 100%; }
+        .ad-banner-emoji { font-size: 48px; flex-shrink: 0; filter: drop-shadow(0 2px 10px rgba(0,0,0,.2)); }
+        .ad-banner-text { flex: 1; }
+        .ad-banner-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.3); }
+        .ad-banner-sub { font-size: 12px; color: rgba(255,255,255,.85); margin-bottom: 10px; }
+        .ad-banner-cta { display: inline-block; padding: 6px 16px; border-radius: 16px; background: rgba(255,255,255,.95); font-size: 12px; font-weight: 700; }
+
+        /* Audience Match */
+        .ad-audience { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 16px; margin-top: 16px; }
+        .ad-audience-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .ad-match-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 6px; }
+        .ad-match-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+        .ad-match-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-bottom: 8px; }
+        .ad-match-tag { color: rgba(255,255,255,.6); }
+        .ad-match-score { font-weight: 700; }
+
+        /* Metrics Grid */
+        .ad-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; }
+        .ad-metric { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 12px; text-align: center; }
+        .ad-metric-val { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
+        .ad-metric-label { font-size: 10px; color: rgba(255,255,255,.5); }
+
+        /* Creative Copy Detail */
+        .ad-copy-block { margin-top: 16px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 16px; }
+        .ad-copy-label { font-size: 11px; color: rgba(255,255,255,.4); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .ad-copy-text { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.8); margin-bottom: 12px; }
+        .ad-copy-text:last-child { margin-bottom: 0; }
+
+        /* ========== Product Search (5) ========== */
+        .search-layout { display: grid; grid-template-columns: 200px 1fr; gap: 20px; }
+        .filter-sidebar h4 { font-size: 14px; margin-bottom: 12px; color: rgba(255,255,255,.6); }
+        .filter-item { padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: background .3s; display: flex; align-items: center; justify-content: space-between; }
+        .filter-item:hover { background: rgba(255,255,255,.05); }
+        .filter-item.active { background: rgba(29,209,161,.15); color: #1dd1a1; }
+        .filter-item .count { font-size: 11px; color: rgba(255,255,255,.3); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+        .product-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all .3s; }
+        .product-card:hover { transform: translateY(-4px); border-color: rgba(254,202,87,.3); box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+        .product-img { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+        .product-info { padding: 12px; }
+        .product-info h4 { font-size: 14px; margin-bottom: 4px; }
+        .product-info .p-price { font-size: 16px; font-weight: 800; color: #feca57; }
+        .product-info .p-tag { font-size: 11px; color: rgba(255,255,255,.4); }
+        .product-info .p-rating { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+        /* ========== Digital Employee (6) ========== */
+        .digital-avatar { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 56px; margin: 0 auto 16px; animation: bounce 2s ease-in-out infinite; background: linear-gradient(135deg, #5f7cf6, #4461ee); }
+        .task-list-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,.03); border-radius: 10px; margin-bottom: 8px; transition: background .3s; }
+        .task-list-item:hover { background: rgba(255,255,255,.07); }
+        .task-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .task-info { flex: 1; }
+        .task-info h5 { font-size: 14px; margin-bottom: 2px; }
+        .task-info p { font-size: 12px; color: rgba(255,255,255,.4); }
+        .task-status { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .task-status.running { background: rgba(72,219,251,.2); color: #48dbfb; }
+        .task-status.done { background: rgba(29,209,161,.2); color: #1dd1a1; }
+        .task-status.pending { background: rgba(255,255,255,.1); color: rgba(255,255,255,.4); }
+
+        /* ========== Customer Service (7) ========== */
+        .chat-container { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; height: 500px; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 10px; }
+        .chat-header .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #feca57, #ff9a3e); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .chat-header .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #1dd1a1; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
+        .msg { max-width: 70%; padding: 10px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; }
+        .msg.bot { align-self: flex-start; background: rgba(255,255,255,.08); border-bottom-left-radius: 4px; }
+        .msg.user { align-self: flex-end; background: linear-gradient(135deg, #feca57, #ff9a3e); border-bottom-right-radius: 4px; }
+        .msg-time { font-size: 10px; color: rgba(255,255,255,.3); margin-top: 4px; }
+        .chat-input-area { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.08); display: flex; gap: 10px; }
+        .quick-replies { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 20px 12px; }
+        .quick-reply { padding: 6px 14px; border-radius: 20px; font-size: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); cursor: pointer; transition: all .3s; }
+        .quick-reply:hover { background: rgba(254,202,87,.15); border-color: rgba(254,202,87,.3); }
+
+        /* ========== Copywriting Video (8) ========== */
+        .result-box { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 20px; margin-top: 16px; }
+        .result-box h4 { font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .result-content { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.7); white-space: pre-wrap; }
+        .storyboard-item { display: flex; gap: 12px; padding: 12px; background: rgba(255,255,255,.03); border-radius: 10px; margin-bottom: 8px; }
+        .storyboard-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+
+        /* ========== Product Description Gen (9) ========== */
+        .generated-desc { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 20px; margin-top: 16px; }
+        .desc-section { margin-bottom: 16px; }
+        .desc-section h4 { font-size: 14px; color: #55efc4; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .desc-section p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.7); }
+        .selling-point { display: flex; align-items: start; gap: 8px; margin-bottom: 6px; font-size: 13px; color: rgba(255,255,255,.65); }
+        .selling-point .check { color: #55efc4; flex-shrink: 0; }
+
+        /* ========== E-commerce Mini (10) ========== */
+        .mini-shop { max-width: 375px; margin: 0 auto; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; overflow: hidden; }
+        .mini-header { padding: 16px; background: linear-gradient(135deg, rgba(124,95,255,.2), rgba(101,84,255,.15)); text-align: center; }
+        .mini-header h3 { font-size: 18px; margin-bottom: 4px; }
+        .mini-header p { font-size: 12px; color: rgba(255,255,255,.5); }
+        .mini-products { padding: 12px; }
+        .mini-product { display: flex; gap: 12px; padding: 12px; background: rgba(255,255,255,.03); border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: background .3s; }
+        .mini-product:hover { background: rgba(255,255,255,.06); }
+        .mini-product .mp-img { width: 64px; height: 64px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+        .mini-product .mp-info h5 { font-size: 14px; margin-bottom: 4px; }
+        .mini-product .mp-info .mp-price { font-size: 15px; font-weight: 800; color: #feca57; }
+        .mini-cart-bar { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; justify-content: space-between; background: rgba(15,12,41,.6); }
+        .cart-count { font-size: 13px; color: rgba(255,255,255,.6); }
+        .cart-total { font-size: 20px; font-weight: 800; color: #feca57; }
+        .mini-order { padding: 16px; }
+
+        /* ========== Appointment System (11) ========== */
+        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 16px 0; }
+        .cal-header { text-align: center; font-size: 12px; color: rgba(255,255,255,.4); padding: 8px 4px; }
+        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all .3s; }
+        .cal-day:hover:not(.disabled) { background: rgba(116,185,255,.15); }
+        .cal-day.selected { background: linear-gradient(135deg, #74b9ff, #0984e3); font-weight: 700; }
+        .cal-day.disabled { color: rgba(255,255,255,.15); cursor: not-allowed; }
+        .cal-day.today { border: 1px solid rgba(116,185,255,.4); }
+        .time-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 16px; }
+        .time-slot { padding: 10px; border-radius: 10px; text-align: center; font-size: 13px; cursor: pointer; transition: all .3s; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03); }
+        .time-slot:hover:not(.disabled) { background: rgba(116,185,255,.15); border-color: rgba(116,185,255,.3); }
+        .time-slot.selected { background: linear-gradient(135deg, #74b9ff, #0984e3); border-color: transparent; }
+        .time-slot.disabled { color: rgba(255,255,255,.15); cursor: not-allowed; text-decoration: line-through; }
+        .appt-list-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,.03); border-radius: 10px; margin-bottom: 8px; }
+        .appt-status { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .appt-status.confirmed { background: rgba(29,209,161,.2); color: #1dd1a1; }
+        .appt-status.pending { background: rgba(254,202,87,.2); color: #feca57; }
+
+        /* ========== Life Services (12) ========== */
+        .service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .service-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px 16px; text-align: center; cursor: pointer; transition: all .3s; }
+        .service-card:hover { transform: translateY(-4px); border-color: rgba(253,160,133,.3); box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+        .service-card.selected { background: rgba(253,160,133,.1); border-color: rgba(253,160,133,.4); }
+        .service-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 10px; }
+        .service-card h4 { font-size: 14px; margin-bottom: 4px; }
+        .service-card p { font-size: 11px; color: rgba(255,255,255,.4); }
+        .service-order-track { display: flex; align-items: center; gap: 8px; padding: 14px; background: rgba(255,255,255,.03); border-radius: 10px; margin-bottom: 8px; }
+        .track-step { flex: 1; text-align: center; position: relative; }
+        .track-step .step-dot { width: 24px; height: 24px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .track-step .step-label { font-size: 11px; color: rgba(255,255,255,.4); }
+        .track-step.active .step-dot { background: linear-gradient(135deg, #fda085, #ff8a65); }
+        .track-step.active .step-label { color: #fda085; font-weight: 600; }
+        .track-step.done .step-dot { background: rgba(29,209,161,.3); color: #1dd1a1; }
+        .track-line { position: absolute; top: 12px; left: 50%; right: -50%; height: 2px; background: rgba(255,255,255,.1); z-index: 0; }
+        .track-step:last-child .track-line { display: none; }
+
+        /* ========== Footer ========== */
+        footer { text-align: center; padding: 40px 24px; border-top: 1px solid rgba(255,255,255,.08); position: relative; z-index: 1; }
+        footer .footer-brand { font-size: 18px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(90deg, #feca57, #48dbfb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        footer p { color: rgba(255,255,255,.4); font-size: 13px; }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 14px; }
+            .hero-stats { gap: 24px; }
+            .stat-number { font-size: 24px; }
+            .grid { grid-template-columns: 1fr; padding: 0 16px 50px; }
+            .nav-links { display: none; }
+            .section-title h2 { font-size: 22px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .search-layout { grid-template-columns: 1fr; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .heatmap-grid { grid-template-columns: 60px repeat(7, 1fr); }
+            .module-view { padding: 20px 16px 40px; }
+            .module-header h2 { font-size: 22px; }
+        }
+        @media (max-width: 480px) {
+            .hero { padding: 40px 16px 30px; }
+            .hero h1 { font-size: 26px; }
+            .hero-stats { gap: 20px; }
+            .stat-number { font-size: 20px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .product-grid { grid-template-columns: 1fr; }
+            .funnel-step { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .persona-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="navigateTo('home')">
+                <div class="logo-icon">&#127775;</div>
+                <span class="logo-text">智享星球</span>
+            </div>
+            <button class="nav-back" id="navBack" onclick="navigateTo('home')">
+                <span>&#8592;</span> 返回首页
+            </button>
+        </div>
+    </nav>
+
+    <!-- ==================== HOME VIEW ==================== -->
+    <div class="view active" id="view-home">
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                AI赋能零售消费新体验
+            </div>
+            <h1><span class="gradient-text">智享星球</span><br>你的零售消费AI应用平台</h1>
+            <p>12大零售消费场景AI应用，从智慧门店到生活服务<br>点击进入即可体验完整功能</p>
+            <div class="hero-stats">
+                <div class="stat-item"><div class="stat-number">12</div><div class="stat-label">AI应用</div></div>
+                <div class="stat-item"><div class="stat-number">4</div><div class="stat-label">核心场景</div></div>
+                <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">全天候</div></div>
+            </div>
+        </section>
+
+        <div class="search-bar">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索你需要的AI应用..." oninput="filterCards()">
+        </div>
+
+        <div class="section-title">
+            <h2>全部AI应用</h2>
+            <p id="searchHint">点击任意卡片进入对应功能</p>
+        </div>
+
+        <div class="grid" id="cardGrid">
+            <div class="card card-1" onclick="navigateTo('smart-store')"><div class="card-icon">&#127979;</div><h3>智慧门店</h3><p>AI驱动的智能门店管理系统，客流分析、热销排行、实时状态一屏掌控</p><span class="card-tag">门店运营</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-2" onclick="navigateTo('sales-forecast')"><div class="card-icon">&#128200;</div><h3>销量预测</h3><p>基于历史数据与AI模型，精准预测商品销量趋势，智能备货建议</p><span class="card-tag">数据分析</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-3" onclick="navigateTo('user-behavior')"><div class="card-icon">&#128202;</div><h3>用户行为分析</h3><p>用户路径漏斗、行为热力图、用户画像，深度洞察消费行为</p><span class="card-tag">数据分析</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-4" onclick="navigateTo('ad-personalization')"><div class="card-icon">&#127901;</div><h3>广告个性化</h3><p>输入用户偏好标签，生成个性化广告创意，千人千面精准触达</p><span class="card-tag">营销推广</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-5" onclick="navigateTo('product-search')"><div class="card-icon">&#128722;</div><h3>商品搜索推荐</h3><p>智能搜索、分类筛选、个性化推荐，让消费者快速找到心仪商品</p><span class="card-tag">营销推广</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-6" onclick="navigateTo('digital-employee')"><div class="card-icon">&#129302;</div><h3>数字员工</h3><p>AI数字员工全天在线，自动处理订单、答疑、巡检，实时监控工作状态</p><span class="card-tag">智能服务</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-7" onclick="navigateTo('customer-service')"><div class="card-icon">&#128172;</div><h3>售前售后客服</h3><p>AI智能客服，实时对话答疑，支持快捷回复与工单流转</p><span class="card-tag">智能服务</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-8" onclick="navigateTo('copywriting-video')"><div class="card-icon">&#127916;</div><h3>文案视频设计</h3><p>输入主题生成营销文案与视频分镜方案，快速产出高质量内容</p><span class="card-tag">内容创作</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-9" onclick="navigateTo('product-desc-gen')"><div class="card-icon">&#128221;</div><h3>商品介绍生成</h3><p>输入商品信息，自动生成详情页文案、卖点提炼与SEO描述</p><span class="card-tag">内容创作</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-10" onclick="navigateTo('mini-shop')"><div class="card-icon">&#128241;</div><h3>电商小程序</h3><p>完整电商购物流程：浏览商品、加入购物车、下单结算、订单管理</p><span class="card-tag">门店运营</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-11" onclick="navigateTo('appointment')"><div class="card-icon">&#128197;</div><h3>在线预约系统</h3><p>日历选时段、填写信息、确认预约、查看预约记录，全流程在线</p><span class="card-tag">门店运营</span><div class="card-arrow">&#8594;</div></div>
+            <div class="card card-12" onclick="navigateTo('life-service')"><div class="card-icon">&#127878;</div><h3>生活服务</h3><p>餐饮、出行、便民等服务分类，一键下单预约，实时进度跟踪</p><span class="card-tag">智能服务</span><div class="card-arrow">&#8594;</div></div>
+        </div>
+    </div>
+
+    <!-- ==================== 1. SMART STORE ==================== -->
+    <div class="view" id="view-smart-store">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">&#127979;</div>
+                <h2>智慧门店</h2>
+                <p>AI驱动的智能门店管理系统，实时数据看板与门店管理</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="s-label">今日客流</div><div class="s-value">1,284</div><div class="s-change s-up">&#9650; 12.3% vs 昨日</div></div>
+                <div class="stat-card"><div class="s-label">今日销售额</div><div class="s-value">&#165;38,950</div><div class="s-change s-up">&#9650; 8.7% vs 昨日</div></div>
+                <div class="stat-card"><div class="s-label">转化率</div><div class="s-value">23.5%</div><div class="s-change s-up">&#9650; 2.1% vs 昨日</div></div>
+                <div class="stat-card"><div class="s-label">平均停留时长</div><div class="s-value">18min</div><div class="s-change s-down">&#9660; 3.2% vs 昨日</div></div>
+            </div>
+            <div class="panel" style="margin-top:20px">
+                <div class="panel-title"><span class="dot" style="background:#ff6b6b"></span>热销商品 TOP 5</div>
+                <div class="bar-chart" id="hotProducts"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#feca57"></span>门店列表与状态</div>
+                <div id="storeList"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#48dbfb"></span>实时门店动态</div>
+                <div id="storeActivity" style="max-height:300px;overflow-y:auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 2. SALES FORECAST ==================== -->
+    <div class="view" id="view-sales-forecast">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#48dbfb,#00bcd4)">&#128200;</div>
+                <h2>销量预测</h2>
+                <p>基于历史数据与AI模型，精准预测商品销量趋势</p>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#48dbfb"></span>选择商品并生成预测</div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                    <div style="flex:1;min-width:200px"><label class="label">选择商品</label><select class="input-field" id="forecastProduct"><option value="0">星巴克拿铁咖啡 350ml</option><option value="1">农夫山泉天然水 550ml</option><option value="2">乐事薯片原味 104g</option><option value="3">舒肤佳沐浴露 400ml</option></select></div>
+                    <div style="flex:1;min-width:200px"><label class="label">预测周期</label><select class="input-field" id="forecastPeriod"><option value="7">未来7天</option><option value="14">未来14天</option><option value="30">未来30天</option></select></div>
+                    <button class="btn btn-blue" onclick="runForecast()">生成预测</button>
+                </div>
+            </div>
+            <div class="panel" id="forecastResultPanel" style="display:none">
+                <div class="panel-title"><span class="dot" style="background:#feca57"></span>预测结果</div>
+                <div id="forecastChart" class="forecast-chart"></div>
+                <div class="forecast-legend"><div class="legend-item"><div class="legend-dot" style="background:linear-gradient(180deg,#48dbfb,#00bcd4)"></div>历史销量</div><div class="legend-item"><div class="legend-dot" style="background:linear-gradient(180deg,#feca57,#ff9a3e)"></div>AI预测销量</div></div>
+                <div id="forecastAdvice" style="margin-top:20px"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 3. USER BEHAVIOR ==================== -->
+    <div class="view" id="view-user-behavior">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#9b59b6,#8e44ad)">&#128202;</div>
+                <h2>用户行为分析</h2>
+                <p>深度洞察消费者行为路径、热力分布与用户画像</p>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#9b59b6"></span>用户转化漏斗</div>
+                <div class="funnel" id="funnelChart"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#bb8fce"></span>行为热力图（周 x 时段）</div>
+                <div class="heatmap-grid" id="heatmap"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#8e44ad"></span>典型用户画像</div>
+                <div id="personaList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 4. AD PERSONALIZATION ==================== -->
+    <div class="view" id="view-ad-personalization">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#ff5990,#ff4757)">&#127901;</div>
+                <h2>广告个性化</h2>
+                <p>输入用户偏好标签，生成个性化广告创意</p>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#ff5990"></span>选择用户偏好标签</div>
+                <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:12px">点击标签选中/取消，至少选1个 — 系统将根据标签匹配最佳创意</p>
+                <div class="tag-chips" id="adTags"></div>
+                <div style="margin-top:16px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+                    <div style="flex:1;min-width:200px"><label class="label">推广商品</label><select class="input-field" id="adProduct"><option value="0">星巴克拿铁咖啡</option><option value="1">AirPods Pro 2</option><option value="2">兰蔻小黑瓶精华</option><option value="3">农夫山泉天然水</option></select></div>
+                    <div style="flex:1;min-width:200px"><label class="label">广告形式</label><select class="input-field" id="adFormat"><option value="feed">信息流广告</option><option value="search">搜索广告</option><option value="banner">横幅广告</option></select></div>
+                    <button class="btn btn-red" onclick="generateAd()">生成广告</button>
+                </div>
+            </div>
+            <div id="adResultPanel" style="display:none">
+                <div class="panel">
+                    <div class="panel-title"><span class="dot" style="background:#ff8ec5"></span>广告创意预览</div>
+                    <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:14px">选择不同创意角度查看差异化广告方案</p>
+                    <div class="ad-angle-tabs">
+                        <div class="ad-angle-tab active" data-angle="rational" onclick="switchAdAngle('rational')">理性诉求</div>
+                        <div class="ad-angle-tab" data-angle="emotional" onclick="switchAdAngle('emotional')">情感共鸣</div>
+                        <div class="ad-angle-tab" data-angle="promotional" onclick="switchAdAngle('promotional')">促销转化</div>
+                    </div>
+                    <div id="adPreview"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title"><span class="dot" style="background:#feca57"></span>受众匹配分析</div>
+                    <div id="adAudience"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title"><span class="dot" style="background:#48dbfb"></span>投放效果预测</div>
+                    <div id="adMetrics"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title"><span class="dot" style="background:#1dd1a1"></span>完整文案</div>
+                    <div id="adCopyDetail"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 5. PRODUCT SEARCH ==================== -->
+    <div class="view" id="view-product-search">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#1dd1a1,#10ac84)">&#128722;</div>
+                <h2>商品搜索推荐</h2>
+                <p>智能搜索、分类筛选、个性化推荐</p>
+            </div>
+            <div class="panel">
+                <div style="display:flex;gap:12px;margin-bottom:16px">
+                    <input type="text" class="input-field" id="productSearchInput" placeholder="搜索商品名称..." oninput="renderProducts()" style="flex:1">
+                    <select class="input-field" id="sortSelect" onchange="renderProducts()" style="width:140px"><option value="default">综合排序</option><option value="price-asc">价格低到高</option><option value="price-desc">价格高到低</option><option value="rating">评分最高</option></select>
+                </div>
+                <div class="search-layout">
+                    <div class="filter-sidebar">
+                        <h4>分类</h4><div id="categoryFilter"></div>
+                        <h4 style="margin-top:16px">价格区间</h4><div id="priceFilter"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:12px" id="productCount">共 0 件商品</div>
+                        <div class="product-grid" id="productGrid"></div>
+                        <div class="panel" style="margin-top:16px"><div class="panel-title"><span class="dot" style="background:#1dd1a1"></span>AI智能推荐</div><div class="product-grid" id="recommendGrid"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 6. DIGITAL EMPLOYEE ==================== -->
+    <div class="view" id="view-digital-employee">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#5f7cf6,#4461ee)">&#129302;</div>
+                <h2>数字员工</h2>
+                <p>AI数字员工全天在线，自动处理任务，实时监控工作状态</p>
+            </div>
+            <div class="panel" style="text-align:center">
+                <div class="digital-avatar">&#129302;</div>
+                <h3 style="font-size:18px;margin-bottom:4px">小智 AI</h3>
+                <p style="font-size:13px;color:rgba(255,255,255,.5)">智能运营助手 | 在线运行中</p>
+                <div style="display:flex;justify-content:center;gap:24px;margin-top:20px">
+                    <div><div style="font-size:24px;font-weight:800;color:#5f7cf6" id="empTotalTasks">0</div><div style="font-size:12px;color:rgba(255,255,255,.4)">总任务</div></div>
+                    <div><div style="font-size:24px;font-weight:800;color:#1dd1a1" id="empDoneTasks">0</div><div style="font-size:12px;color:rgba(255,255,255,.4)">已完成</div></div>
+                    <div><div style="font-size:24px;font-weight:800;color:#48dbfb" id="empRunningTasks">0</div><div style="font-size:12px;color:rgba(255,255,255,.4)">进行中</div></div>
+                </div>
+            </div>
+            <div class="panel"><div class="panel-title"><span class="dot" style="background:#5f7cf6"></span>任务列表</div><div id="empTaskList"></div></div>
+            <div class="panel"><div class="panel-title"><span class="dot" style="background:#1dd1a1"></span>工作日志</div><div id="empWorkLog" style="max-height:300px;overflow-y:auto"></div></div>
+        </div>
+    </div>
+
+    <!-- ==================== 7. CUSTOMER SERVICE ==================== -->
+    <div class="view" id="view-customer-service">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#feca57,#f1c40f)">&#128172;</div>
+                <h2>售前售后客服</h2>
+                <p>AI智能客服，实时对话答疑，支持快捷回复与工单流转</p>
+            </div>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="avatar">&#129302;</div>
+                    <div>
+                        <div style="font-size:15px;font-weight:700">智能客服小慧</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:6px"><span class="status-dot"></span> 在线 | 平均响应 &lt;1s</div>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="quick-replies" id="quickReplies"></div>
+                <div class="chat-input-area">
+                    <input type="text" class="input-field" id="chatInput" placeholder="输入你的问题..." onkeypress="if(event.keyCode===13)sendChatMessage()" style="flex:1">
+                    <button class="btn btn-primary" onclick="sendChatMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 8. COPYWRITING VIDEO ==================== -->
+    <div class="view" id="view-copywriting-video">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#ff7675,#ff6348)">&#127916;</div>
+                <h2>文案视频设计</h2>
+                <p>输入主题生成营销文案与视频分镜方案</p>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#ff7675"></span>创作输入</div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:200px"><label class="label">主题/商品</label><input type="text" class="input-field" id="cwTopic" placeholder="如：夏季新品凉茶推广"></div>
+                    <div style="flex:1;min-width:200px"><label class="label">内容类型</label><select class="input-field" id="cwType"><option value="shortvideo">短视频脚本</option><option value="copywriting">营销文案</option><option value="storyboard">视频分镜方案</option><option value="slogan">广告Slogan</option></select></div>
+                    <div style="flex:1;min-width:200px"><label class="label">风格</label><select class="input-field" id="cwStyle"><option value="vitality">活力年轻</option><option value="warm">温馨治愈</option><option value="professional">专业商务</option><option value="funny">幽默搞怪</option></select></div>
+                </div>
+                <div style="margin-top:16px"><button class="btn btn-red" onclick="generateCopywriting()">开始创作</button></div>
+            </div>
+            <div id="cwResultPanel" style="display:none"></div>
+        </div>
+    </div>
+
+    <!-- ==================== 9. PRODUCT DESC GEN ==================== -->
+    <div class="view" id="view-product-desc-gen">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#55efc4,#00d2a8)">&#128221;</div>
+                <h2>商品介绍生成</h2>
+                <p>输入商品信息，自动生成详情页文案、卖点提炼</p>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#55efc4"></span>商品信息输入</div>
+                <div style="display:grid;gap:12px">
+                    <div><label class="label">商品名称</label><input type="text" class="input-field" id="pdName" placeholder="如：小米14 Pro 16GB+512GB"></div>
+                    <div><label class="label">核心卖点（用逗号分隔）</label><input type="text" class="input-field" id="pdPoints" placeholder="如：骁龙8 Gen3, 徕卡光学, 120W快充"></div>
+                    <div><label class="label">目标人群</label><select class="input-field" id="pdAudience"><option value="young">年轻科技爱好者</option><option value="business">商务人士</option><option value="student">学生群体</option><option value="family">家庭用户</option></select></div>
+                    <div><label class="label">价格（可选）</label><input type="text" class="input-field" id="pdPrice" placeholder="如：4999元"></div>
+                </div>
+                <div style="margin-top:16px"><button class="btn btn-green" onclick="generateProductDesc()">生成介绍</button></div>
+            </div>
+            <div id="pdResultPanel" style="display:none"></div>
+        </div>
+    </div>
+
+    <!-- ==================== 10. MINI SHOP ==================== -->
+    <div class="view" id="view-mini-shop">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#7c5fff,#6c5ce7)">&#128241;</div>
+                <h2>电商小程序</h2>
+                <p>完整购物流程：浏览、加购物车、下单、订单管理</p>
+            </div>
+            <div class="mini-shop">
+                <div class="mini-header"><h3>&#129302; 智享优选商城</h3><p>AI精选好物 | 品质保障</p></div>
+                <div class="mini-products" id="miniProducts"></div>
+                <div class="mini-cart-bar" id="miniCartBar">
+                    <div><div class="cart-count" id="miniCartCount">&#128722; 购物车 (0)</div><div class="cart-total" id="miniCartTotal">&#165;0</div></div>
+                    <button class="btn btn-purple" id="miniCheckoutBtn" onclick="miniCheckout()" disabled>去结算</button>
+                </div>
+            </div>
+            <div class="panel" style="margin-top:20px" id="miniOrderPanel"><div class="panel-title"><span class="dot" style="background:#7c5fff"></span>我的订单</div><div id="miniOrders"></div></div>
+        </div>
+    </div>
+
+    <!-- ==================== 11. APPOINTMENT ==================== -->
+    <div class="view" id="view-appointment">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#74b9ff,#0984e3)">&#128197;</div>
+                <h2>在线预约系统</h2>
+                <p>日历选时段、填写信息、确认预约、查看记录</p>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><span class="dot" style="background:#74b9ff"></span>选择日期</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <button class="btn" style="background:rgba(255,255,255,.1);padding:8px 14px" onclick="changeMonth(-1)">&#9664;</button>
+                    <span id="calMonthLabel" style="font-size:16px;font-weight:700"></span>
+                    <button class="btn" style="background:rgba(255,255,255,.1);padding:8px 14px" onclick="changeMonth(1)">&#9654;</button>
+                </div>
+                <div class="calendar" id="calendar"></div>
+            </div>
+            <div class="panel" id="timeSlotPanel" style="display:none"><div class="panel-title"><span class="dot" style="background:#74b9ff"></span>选择时段</div><div class="time-slots" id="timeSlots"></div></div>
+            <div class="panel" id="apptFormPanel" style="display:none">
+                <div class="panel-title"><span class="dot" style="background:#feca57"></span>填写预约信息</div>
+                <div style="display:grid;gap:12px">
+                    <div><label class="label">姓名</label><input type="text" class="input-field" id="apptName" placeholder="你的姓名"></div>
+                    <div><label class="label">手机号</label><input type="text" class="input-field" id="apptPhone" placeholder="手机号码"></div>
+                    <div><label class="label">备注（可选）</label><textarea class="input-field" id="apptNote" placeholder="特殊需求说明"></textarea></div>
+                </div>
+                <div style="margin-top:16px"><button class="btn btn-blue" onclick="confirmAppointment()">确认预约</button></div>
+            </div>
+            <div class="panel"><div class="panel-title"><span class="dot" style="background:#1dd1a1"></span>我的预约记录</div><div id="apptList"></div></div>
+        </div>
+    </div>
+
+    <!-- ==================== 12. LIFE SERVICE ==================== -->
+    <div class="view" id="view-life-service">
+        <div class="module-view">
+            <div class="module-header">
+                <div class="m-icon" style="background:linear-gradient(135deg,#fda085,#ff8a65)">&#127878;</div>
+                <h2>生活服务</h2>
+                <p>餐饮、出行、便民等服务，一键下单，实时跟踪</p>
+            </div>
+            <div class="panel"><div class="panel-title"><span class="dot" style="background:#fda085"></span>选择服务类型</div><div class="service-grid" id="serviceGrid"></div></div>
+            <div class="panel" id="serviceOrderPanel" style="display:none">
+                <div class="panel-title"><span class="dot" style="background:#feca57"></span>填写需求</div>
+                <div style="display:grid;gap:12px">
+                    <div><label class="label">详细描述</label><textarea class="input-field" id="serviceDesc" placeholder="描述你的需求..."></textarea></div>
+                    <div><label class="label">地址</label><input type="text" class="input-field" id="serviceAddr" placeholder="服务地址"></div>
+                    <div><label class="label">期望时间</label><input type="text" class="input-field" id="serviceTime" placeholder="如：今天下午3点"></div>
+                </div>
+                <div style="margin-top:16px"><button class="btn" style="background:linear-gradient(135deg,#fda085,#ff8a65)" onclick="submitServiceOrder()">提交订单</button></div>
+            </div>
+            <div class="panel" id="serviceTrackPanel" style="display:none"><div class="panel-title"><span class="dot" style="background:#1dd1a1"></span>订单进度跟踪</div><div id="serviceTrack"></div></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-brand">智享星球</div>
+        <p>AI赋能零售消费新体验 &copy; 2026 智享星球. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // ==================== Navigation ====================
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+            var target = document.getElementById('view-' + viewId);
+            if (target) {
+                target.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                var navBack = document.getElementById('navBack');
+                if (viewId === 'home') { navBack.classList.remove('show'); }
+                else {
+                    navBack.classList.add('show');
+                    if (viewId === 'smart-store') initSmartStore();
+                    if (viewId === 'sales-forecast') {}
+                    if (viewId === 'user-behavior') initUserBehavior();
+                    if (viewId === 'ad-personalization') initAdPersonalization();
+                    if (viewId === 'product-search') initProductSearch();
+                    if (viewId === 'digital-employee') initDigitalEmployee();
+                    if (viewId === 'customer-service') initCustomerService();
+                    if (viewId === 'copywriting-video') {}
+                    if (viewId === 'product-desc-gen') {}
+                    if (viewId === 'mini-shop') initMiniShop();
+                    if (viewId === 'appointment') initAppointment();
+                    if (viewId === 'life-service') initLifeService();
+                }
+            }
+        }
+
+        function showToast(msg, isError) {
+            var toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.className = 'toast show' + (isError ? ' error' : '');
+            setTimeout(function() { toast.className = 'toast'; }, 2500);
+        }
+
+        function filterCards() {
+            var keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            var cards = document.querySelectorAll('.card');
+            var count = 0;
+            cards.forEach(function(card) {
+                var text = card.textContent.toLowerCase();
+                if (text.indexOf(keyword) !== -1) { card.style.display = ''; count++; }
+                else { card.style.display = 'none'; }
+            });
+            var hint = document.getElementById('searchHint');
+            if (keyword === '') hint.textContent = '点击任意卡片进入对应功能';
+            else if (count === 0) hint.textContent = '没有找到匹配的应用';
+            else hint.textContent = '找到 ' + count + ' 个匹配应用';
+        }
+
+        document.addEventListener('mousemove', function(e) {
+            var x = (e.clientX / window.innerWidth - 0.5) * 20;
+            var y = (e.clientY / window.innerHeight - 0.5) * 20;
+            var b1 = document.querySelector('.bubble-1');
+            var b2 = document.querySelector('.bubble-2');
+            var b3 = document.querySelector('.bubble-3');
+            if (b1) b1.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+            if (b2) b2.style.transform = 'translate(' + (-x) + 'px,' + (-y) + 'px)';
+            if (b3) b3.style.transform = 'translate(' + (x*0.5) + 'px,' + (y*0.5) + 'px)';
+        });
+
+        // ==================== 1. Smart Store ====================
+        var storeData = {
+            products: [
+                { name: '星巴克拿铁咖啡', sales: 328, color: '#ff6b6b' },
+                { name: '农夫山泉天然水', sales: 285, color: '#48dbfb' },
+                { name: '乐事薯片原味', sales: 198, color: '#feca57' },
+                { name: '舒肤佳沐浴露', sales: 156, color: '#1dd1a1' },
+                { name: '小米充电宝', sales: 89, color: '#7c5fff' }
+            ],
+            stores: [
+                { name: '星巴克北京三里屯店', status: 'open', traffic: 342, sales: 12800 },
+                { name: '便利店朝阳大悦城店', status: 'open', traffic: 218, sales: 5600 },
+                { name: '超市中关村店', status: 'open', traffic: 512, sales: 18600 },
+                { name: '便利店西单店', status: 'closed', traffic: 0, sales: 0 }
+            ],
+            activities: [
+                { time: '21:45', text: '三里屯店客流量突破300人', type: 'up' },
+                { time: '21:30', text: '中关村店商品农夫山泉库存不足，已自动补货', type: 'warn' },
+                { time: '21:15', text: '朝阳大悦城店完成第200笔交易', type: 'ok' },
+                { time: '20:50', text: '西单店已关闭，明日9:00营业', type: 'info' },
+                { time: '20:30', text: '三里屯店热销商品TOP1：星巴克拿铁', type: 'info' },
+                { time: '20:00', text: '全店今日销售额突破3万元', type: 'ok' }
+            ]
+        };
+
+        function initSmartStore() {
+            var html = '';
+            storeData.products.forEach(function(p) {
+                var pct = (p.sales / 328 * 100).toFixed(0);
+                html += '<div class="bar-row"><div class="bar-label">' + p.name + '</div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + p.color + '"></div></div><div class="bar-value">' + p.sales + '</div></div>';
+            });
+            document.getElementById('hotProducts').innerHTML = html;
+
+            html = '';
+            storeData.stores.forEach(function(s) {
+                html += '<div class="store-list-item"><div><div style="font-size:14px;font-weight:600">' + s.name + '</div><div style="font-size:12px;color:rgba(255,255,255,.4)">客流 ' + s.traffic + ' | 销售 &#165;' + s.sales.toLocaleString() + '</div></div><span class="store-status ' + s.status + '">' + (s.status === 'open' ? '营业中' : '已闭店') + '</span></div>';
+            });
+            document.getElementById('storeList').innerHTML = html;
+
+            html = '';
+            storeData.activities.forEach(function(a) {
+                var icon = a.type === 'up' ? '\uD83D\uDCC8' : a.type === 'warn' ? '\u26A0' : a.type === 'ok' ? '\u2705' : '\u2139';
+                html += '<div class="store-list-item"><span style="font-size:16px">' + icon + '</span><div style="flex:1"><span style="font-size:13px">' + a.text + '</span></div><span style="font-size:12px;color:rgba(255,255,255,.3)">' + a.time + '</span></div>';
+            });
+            document.getElementById('storeActivity').innerHTML = html;
+        }
+
+        // ==================== 2. Sales Forecast ====================
+        var forecastData = [
+            { name: '星巴克拿铁咖啡 350ml', history: [120, 135, 128, 142, 138, 155, 148], predict: [152, 160, 145, 168, 172, 158, 165, 170, 163, 175, 168, 180, 172, 185, 178, 190, 182, 195, 188, 200, 185, 198, 190, 205, 192, 210, 195, 215, 200, 220, 205, 225, 210, 230] },
+            { name: '农夫山泉天然水 550ml', history: [200, 185, 210, 195, 220, 205, 230], predict: [225, 240, 218, 250, 245, 235, 260, 255, 268, 250, 275, 265, 280, 270, 285, 275, 290, 280, 295, 285, 300, 290, 310, 295, 315, 300, 320, 305, 325, 310, 330, 315, 335, 320] },
+            { name: '乐事薯片原味 104g', history: [85, 92, 78, 88, 95, 82, 90], predict: [88, 95, 85, 92, 98, 90, 96, 93, 100, 88, 95, 102, 92, 98, 105, 95, 100, 108, 98, 103, 110, 100, 105, 112, 103, 108, 115, 105, 110, 118, 108, 115, 120, 112] },
+            { name: '舒肤佳沐浴露 400ml', history: [45, 52, 48, 55, 50, 58, 53], predict: [56, 60, 52, 62, 58, 55, 65, 60, 63, 58, 66, 62, 65, 60, 68, 64, 67, 62, 70, 66, 69, 64, 72, 68, 71, 66, 74, 70, 73, 68, 76, 72, 75, 70] }
+        ];
+
+        function runForecast() {
+            var pIdx = parseInt(document.getElementById('forecastProduct').value);
+            var period = parseInt(document.getElementById('forecastPeriod').value);
+            var data = forecastData[pIdx];
+            var allHistory = data.history;
+            var allPredict = data.predict.slice(0, period);
+
+            var maxVal = Math.max.apply(null, allHistory.concat(allPredict));
+            var html = '';
+            allHistory.forEach(function(v) {
+                var h = (v / maxVal * 180).toFixed(0);
+                html += '<div class="forecast-bar actual" style="height:' + h + 'px"><div class="bar-tip">' + v + '</div></div>';
+            });
+            allPredict.forEach(function(v) {
+                var h = (v / maxVal * 180).toFixed(0);
+                html += '<div class="forecast-bar predicted" style="height:' + h + 'px"><div class="bar-tip">' + v + '</div></div>';
+            });
+            document.getElementById('forecastChart').innerHTML = html;
+
+            var totalPredict = allPredict.reduce(function(a,b) { return a+b; }, 0);
+            var avgPredict = Math.round(totalPredict / allPredict.length);
+            var trend = allPredict[allPredict.length-1] > allHistory[allHistory.length-1] ? '上升' : '波动';
+            var advice = '<div class="result-box"><h4>\uD83D\uDCA1 AI备货建议</h4><div class="result-content">预测周期内总销量约 <b style="color:#feca57">' + totalPredict + '</b> 件，日均约 <b style="color:#feca57">' + avgPredict + '</b> 件。趋势：' + trend + '。建议备货量：' + Math.ceil(totalPredict * 1.15) + ' 件（含15%安全库存）。峰值日预计在第' + (allPredict.indexOf(Math.max.apply(null, allPredict))+1) + '天，建议提前备货。</div></div>';
+            document.getElementById('forecastAdvice').innerHTML = advice;
+            document.getElementById('forecastResultPanel').style.display = 'block';
+            showToast('预测完成！');
+        }
+
+        // ==================== 3. User Behavior ====================
+        function initUserBehavior() {
+            var funnelData = [
+                { label: '曝光触达', value: 10000, color: 'rgba(155,89,182,.6)' },
+                { label: '点击进入', value: 4500, color: 'rgba(155,89,182,.55)' },
+                { label: '浏览商品', value: 2800, color: 'rgba(155,89,182,.5)' },
+                { label: '加入购物车', value: 1200, color: 'rgba(155,89,182,.45)' },
+                { label: '下单支付', value: 580, color: 'rgba(155,89,182,.4)' }
+            ];
+            var html = '';
+            funnelData.forEach(function(f, i) {
+                var pct = (f.value / funnelData[0].value * 100).toFixed(1);
+                var widthReduction = i * 12;
+                html += '<div class="funnel-step" style="background:' + f.color + ';width:calc(' + (100-widthReduction) + '%);margin:0 auto"><span class="f-label">' + f.label + '</span><span class="f-value">' + f.value + ' (' + pct + '%)</span></div>';
+                if (i < funnelData.length-1) html += '<div class="funnel-arrow">\u25BC</div>';
+            });
+            document.getElementById('funnelChart').innerHTML = html;
+
+            var days = ['周一','周二','周三','周四','周五','周六','周日'];
+            var hours = ['6h','9h','12h','15h','18h','21h','24h'];
+            html = '<div class="heatmap-header"></div>';
+            days.forEach(function(d) { html += '<div class="heatmap-header">' + d + '</div>'; });
+            hours.forEach(function(h, hi) {
+                html += '<div class="heatmap-label">' + h + '</div>';
+                days.forEach(function(d, di) {
+                    var intensity = Math.random();
+                    var isWeekend = di >= 5;
+                    if (isWeekend && hi >= 3) intensity = Math.min(intensity + 0.3, 1);
+                    if (hi >= 4 && hi <= 5) intensity = Math.min(intensity + 0.2, 1);
+                    var r = Math.round(155 + intensity * 100);
+                    var g = Math.round(89 + intensity * 100);
+                    var b = Math.round(182 - intensity * 50);
+                    var alpha = 0.2 + intensity * 0.8;
+                    var visitors = Math.round(intensity * 500 + 50);
+                    html += '<div class="heatmap-cell" style="background:rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')" title="' + d + ' ' + h + ': ' + visitors + '人">' + visitors + '</div>';
+                });
+            });
+            document.getElementById('heatmap').innerHTML = html;
+
+            var personas = [
+                { avatar: '\uD83D\uDC69', name: '都市白领Linda', age: '28岁', tags: ['高频复购', '品质优先', '晚间活跃', '偏好生鲜'], desc: '月均消费3800元，复购率65%' },
+                { avatar: '\uD83D\uDC68', name: '大学生小王', age: '21岁', tags: ['价格敏感', '社交分享', '午间活跃', '偏好零食'], desc: '月均消费680元，分享率40%' },
+                { avatar: '\uD83D\uDC6A', name: '宝妈张姐', age: '35岁', tags: ['家庭采购', '量大优惠', '周末集中', '偏好母婴'], desc: '月均消费5200元，客单价高' }
+            ];
+            html = '';
+            personas.forEach(function(p) {
+                var tagsHtml = p.tags.map(function(t) { return '<span class="persona-tag">' + t + '</span>'; }).join('');
+                html += '<div class="persona-card"><div class="persona-avatar" style="background:linear-gradient(135deg,#9b59b6,#8e44ad)">' + p.avatar + '</div><div class="persona-info"><h4>' + p.name + ' (' + p.age + ')</h4><p>' + p.desc + '</p><div class="persona-tags">' + tagsHtml + '</div></div></div>';
+            });
+            document.getElementById('personaList').innerHTML = html;
+        }
+
+        // ==================== 4. Ad Personalization ====================
+        var adTagsData = ['年轻女性', '高收入', '母婴人群', '健身爱好者', '美食达人', '科技极客', '时尚潮流', '家庭主妇', '学生群体', '商务人士', '环保主义', '宠物主人'];
+        var selectedAdTags = [];
+        var currentAdAngle = 'rational';
+        var currentAdResult = null;
+
+        function initAdPersonalization() {
+            var html = '';
+            adTagsData.forEach(function(tag) {
+                html += '<div class="tag-chip" onclick="toggleAdTag(this, \'' + tag + '\')">' + tag + '</div>';
+            });
+            document.getElementById('adTags').innerHTML = html;
+            selectedAdTags = [];
+        }
+
+        function toggleAdTag(el, tag) {
+            var idx = selectedAdTags.indexOf(tag);
+            if (idx > -1) { selectedAdTags.splice(idx, 1); el.classList.remove('selected'); }
+            else { selectedAdTags.push(tag); el.classList.add('selected'); }
+        }
+
+        var adProductsData = [
+            { name: '星巴克拿铁咖啡', price: 32, originalPrice: 38, emoji: '\u2615', brand: '星巴克', category: '饮品', color: '#ff6b6b', color2: '#feca57', bg: 'linear-gradient(135deg, #2d1810, #5c3a1e)' },
+            { name: 'AirPods Pro 2', price: 1899, originalPrice: 2199, emoji: '\uD83C\uDFA7', brand: 'Apple', category: '数码', color: '#48dbfb', color2: '#7c5fff', bg: 'linear-gradient(135deg, #1a1a2e, #16213e)' },
+            { name: '兰蔻小黑瓶精华', price: 780, originalPrice: 980, emoji: '\uD83D\uDC8B', brand: 'Lancome', category: '美妆', color: '#ff5990', color2: '#9b59b6', bg: 'linear-gradient(135deg, #2c0a1e, #5a1842)' },
+            { name: '农夫山泉天然水', price: 2, originalPrice: 3, emoji: '\uD83D\uDCA7', brand: '农夫山泉', category: '饮品', color: '#1dd1a1', color2: '#48dbfb', bg: 'linear-gradient(135deg, #0d4f3c, #1a9070)' }
+        ];
+
+        // 4 products x 3 angles = 12 creative variants
+        var adCreativeData = [
+            // Product 0: 星巴克拿铁咖啡
+            {
+                rational: {
+                    headline: 'SCA认证阿拉比卡豆，每杯含7g植物蛋白',
+                    sub: '连续20年全球咖啡品牌满意度第一',
+                    desc: '星巴克拿铁选用100%阿拉比卡咖啡豆，通过SCA精品咖啡协会认证。每杯含7g优质植物蛋白，低酸配方温和不刺激。门店日均出品50万杯，品质始终如一。',
+                    points: ['SCA认证豆', '7g植物蛋白', '低酸配方', '20年品牌'],
+                    cta: '立即品尝',
+                    copy: '星巴克拿铁咖啡\n\n【产品参数】\n- 咖啡豆：100%阿拉比卡，SCA评分84+\n- 蛋白含量：7g/杯（全脂奶版）\n- 咖啡因含量：75mg/350ml\n- 最佳饮用温度：60-65°C\n- 保质期：制作后2小时内饮用最佳\n\n【品质认证】\n- SCA精品咖啡协会认证\n- ISO22000食品安全认证\n- 连续20年全球咖啡品牌满意度第一\n\n【营养成分表（每350ml）】\n- 能量：190kcal\n- 蛋白质：7g\n- 脂肪：7g\n- 碳水化合物：19g\n- 钙：300mg\n\n每一杯都经过咖啡师标准化萃取：18g粉、9bar压力、25秒萃取时间，确保每杯风味一致。',
+                    searchDesc: 'SCA认证阿拉比卡豆制作，含7g植物蛋白，连续20年满意度第一的星巴克拿铁',
+                    keywords: ['星巴克拿铁', '咖啡', 'SCA认证', '阿拉比卡'],
+                    url: 'starbucks.com/latte'
+                },
+                emotional: {
+                    headline: '清晨第一杯，唤醒你的每一天',
+                    sub: '不只是咖啡，是属于你的安静时光',
+                    desc: '晨光透过窗帘，一杯拿铁的香气弥漫开来。奶泡绵密，咖啡醇厚，这一刻世界是安静的。每一杯拿铁，都是和自己的一次温柔对话——你值得，每天为自己留15分钟。',
+                    points: ['晨间仪式感', '独处时光', '温暖治愈', '品质生活'],
+                    cta: '给自己一杯',
+                    copy: '星巴克拿铁咖啡\n\n【品牌故事】\n在西雅图的第一家门店，霍华德·舒尔茨喝下了第一杯意式拿铁，他说："那一刻我听到的不是蒸汽声，而是意大利人对生活的热情。"\n\n从此，星巴克不只是卖咖啡，而是卖一种"第三空间"——家和公司之外的温柔角落。\n\n【场景文案】\n清晨7:15，闹钟响起。\n你伸了个懒腰，走进星巴克。\n"一杯拿铁，中杯，谢谢。"\n咖啡师微笑着在杯上写下你的名字。\n奶泡绵密如云，咖啡醇厚如初。\n第一口，世界温柔了。\n第二口，你想起昨天的梦。\n第三口，今天，准备好了。\n\n这杯拿铁，不只是一杯咖啡。\n是你对自己的承诺：每一天，都值得好好开始。',
+                    searchDesc: '清晨的仪式感，一杯拿铁唤醒每一天。星巴克——你和自己的温柔对话',
+                    keywords: ['星巴克拿铁', '早晨咖啡', '品质生活', '仪式感'],
+                    url: 'starbucks.com/morning'
+                },
+                promotional: {
+                    headline: '今日限定！拿铁第二杯半价',
+                    sub: '新用户首单立减10元，老带新双方各得优惠券',
+                    desc: '限时活动！今日全场拿铁第二杯半价。新用户注册即送10元新人券，邀请好友下单双方各得15元优惠券。活动仅限今日，错过等一年！',
+                    points: ['第二杯半价', '新用户减10', '邀请返券15', '今日限定'],
+                    cta: '抢限时优惠',
+                    copy: '星巴克拿铁咖啡\n\n【限时活动详情】\n活动时间：今日00:00 - 23:59\n\n活动一：第二杯半价\n- 购买任意杯型拿铁，第二杯享5折\n- 两杯可不同口味\n- 原价38元/杯，两杯仅57元（省19元）\n\n活动二：新人专享\n- 首次注册星巴克会员\n- 即送10元无门槛券\n- 32元拿铁，到手仅22元\n\n活动三：邀请有礼\n- 邀请好友首次下单\n- 双方各得15元优惠券\n- 邀请5人，可得75元\n\n【使用规则】\n1. 活动一与活动二不可叠加\n2. 优惠券有效期7天\n3. 每人每日限参与1次\n4. 仅限堂食/外带，外卖不参与\n\n今日限定，错过等一年！',
+                    searchDesc: '今日限定！星巴克拿铁第二杯半价，新用户首单立减10元，限时活动',
+                    keywords: ['星巴克优惠', '拿铁半价', '咖啡折扣', '新人立减'],
+                    url: 'starbucks.com/deal'
+                }
+            },
+            // Product 1: AirPods Pro 2
+            {
+                rational: {
+                    headline: 'H2芯片驱动，降噪效果提升2倍',
+                    sub: '6小时续航+30小时总续航，IP54防尘防水',
+                    desc: 'Apple AirPods Pro 2搭载全新H2芯片，主动降噪效果较前代提升2倍。通透模式让环境音自然传入。单次充电续航6小时，配合充电盒总续航30小时。支持IP54防尘防水，运动无忧。',
+                    points: ['H2芯片', '降噪2倍提升', '6h+30h续航', 'IP54防水'],
+                    cta: '查看详情',
+                    copy: 'Apple AirPods Pro 2\n\n【核心技术】\n- 芯片：Apple H2芯片（第二代定制芯片）\n- 主动降噪：较AirPods Pro一代提升2倍，可减少最高48dB环境噪声\n- 通透模式：自适应通透模式，支持48kHz采样率\n- 空间音频：个性化空间音频，支持动态头部追踪\n- 音频处理：自适应音频技术，自动切换降噪/通透\n\n【续航参数】\n- 降噪模式：单次6小时，总续航30小时\n- 通透模式：单次5.5小时，总续航27小时\n- 快充：充电5分钟，使用1小时\n- 充电方式：Lightning/MagSafe/Apple Watch充电器\n\n【物理参数】\n- 防护等级：IP54（防尘+防溅水）\n- 传感器：皮肤检测传感器+运动加速感应器\n- 麦克风：双波束成形麦克风\n- 重量：5.3g/只\n\n【兼容性】\n- iOS 16及以上\n- macOS Ventura及以上\n- 支持自动设备切换',
+                    searchDesc: 'Apple AirPods Pro 2，H2芯片降噪提升2倍，6+30小时续航，IP54防水',
+                    keywords: ['AirPods Pro 2', 'H2芯片', '降噪耳机', '苹果耳机'],
+                    url: 'apple.com/airpods-pro'
+                },
+                emotional: {
+                    headline: '戴上世界，摘下喧嚣',
+                    sub: '你的私人音乐厅，随时随地',
+                    desc: '地铁的轰鸣、办公室的嘈杂、街头的喧嚣……戴上AirPods Pro 2，世界瞬间安静。按下操控，通透模式让你听见站名。再按一下，回到你的音乐世界。这不是耳机，是你和自己之间的边界。',
+                    points: ['私密空间', '沉浸音乐', '一键切换', '随心掌控'],
+                    cta: '进入你的世界',
+                    copy: 'Apple AirPods Pro 2\n\n【场景文案一·通勤】\n早上8:15，地铁3号线。\n人群从两侧涌入，广播声、交谈声、列车呼啸声。\n你戴上AirPods Pro 2。\n按住柄部——世界安静了。\n降噪开启，48dB的环境噪声被隔绝在外。\n你的歌单开始播放。\n此刻，整节地铁车厢是你的私人空间。\n\n【场景文案二·办公】\n下午2:30，开放式办公区。\n同事讨论声、键盘敲击声、电话铃此起彼伏。\n你轻触左耳——通透模式。\n你需要听到同事叫你，但不要听到所有。\n自适应音频，帮你在专注和社交之间自由切换。\n\n【场景文案三·运动】\n傍晚6:00，公园跑道。\n汗水滑落，AirPods Pro 2稳稳贴合。\nIP54防尘防水，风雨无阻。\n节奏感强的音乐推着你往前跑。\n最后一公里，你加速了。\n\n戴上世界，摘下喧嚣。\nAirPods Pro 2，你和世界之间的旋钮。',
+                    searchDesc: 'AirPods Pro 2，戴上世界摘下喧嚣，你的私人音乐厅随时随地',
+                    keywords: ['AirPods Pro 2', '降噪耳机', '沉浸音乐', '苹果耳机'],
+                    url: 'apple.com/airpods-pro/feel'
+                },
+                promotional: {
+                    headline: '限时直降400元！还享免息分期',
+                    sub: '教育优惠额外减100元，以旧换新最高抵800',
+                    desc: '限时直降400元！AirPods Pro 2到手价1499元。支持12期免息分期，每月仅125元。教育认证额外减100元，到手1399元。以旧换新：旧AirPods最高抵扣800元。活动限本周！',
+                    points: ['直降400元', '12期免息', '教育再减100', '以旧换新抵800'],
+                    cta: '抢购特惠',
+                    copy: 'Apple AirPods Pro 2\n\n【限时活动详情】\n活动时间：本周一00:00 - 周日23:59\n\n活动一：限时直降\n- 原价2199元，限时直降400元\n- 到手价1799元\n- 全网最低价保障\n\n活动二：免息分期\n- 支持12期免息，每月仅150元\n- 支持6期免息，每月300元\n- 支持3期免息，每月600元\n\n活动三：教育优惠\n- Apple教育商店认证\n- 额外再减100元\n- 到手价1699元\n- 需提供学生证/教师证\n\n活动四：以旧换新\n- 旧AirPods Pro一代：最高抵扣400元\n- 旧AirPods 1/2代：最高抵扣200元\n- 旧其他品牌TWS：最高抵扣100元\n- 叠加直降，最低到手1299元\n\n【叠加规则】\n- 直降+免息分期可叠加\n- 直降+教育优惠可叠加\n- 直降+以旧换新可叠加\n- 三项不可同时叠加\n\n数量有限，售完即止！',
+                    searchDesc: 'AirPods Pro 2限时直降400元，12期免息分期，教育优惠再减100',
+                    keywords: ['AirPods Pro 2优惠', '耳机折扣', '免息分期', '以旧换新'],
+                    url: 'apple.com/airpods-pro/deal'
+                }
+            },
+            // Product 2: 兰蔻小黑瓶精华
+            {
+                rational: {
+                    headline: '76%二裂酵母浓度，28天可见淡化细纹',
+                    sub: '皮肤科医生推荐，敏感肌适用，过敏率低于0.3%',
+                    desc: '兰蔻小黑瓶精华含76%高浓度二裂酵母发酵产物，经临床验证28天可见淡化细纹。通过皮肤科医生安全性测试，敏感肌适用。过敏率低于0.3%。质地清爽不黏腻，吸收速度比传统精华快40%。',
+                    points: ['76%二裂酵母', '28天淡纹', '敏感肌适用', '吸收快40%'],
+                    cta: '查看成分',
+                    copy: '兰蔻小黑瓶精华\n\n【核心成分】\n- 二裂酵母发酵产物溶胞物：76%高浓度\n- 甘露糖：促进角质代谢\n- α-葡聚糖：增强皮肤屏障\n- 酵母提取物：提亮肤色\n- 环戊硅氧烷：丝滑触感\n\n【临床数据】\n- 28天：83%受试者可见细纹淡化\n- 14天：76%受试者肤质改善\n- 7天：91%受试者保湿提升\n- 过敏率：0.27%（第三方机构检测）\n- 测试人群：1200人，年龄25-55\n\n【安全性认证】\n- 皮肤科医生推荐认证\n- 敏感肌适用测试通过\n- 无酒精、无矿物油、无对羟基苯甲酸酯\n- 通过欧盟EC 1223/2009安全标准\n\n【使用参数】\n- 质地：精华液/精华乳过渡质地\n- 吸收速度：较传统精华快40%\n- 推荐用量：2-3滴/次，早晚各1次\n- 搭配建议：洁面→爽肤水→小黑瓶→面霜\n- 保质期：开封后12个月\n\n【规格】\n- 20ml / 30ml / 50ml\n- 产地：法国\n- 生产批号可追溯',
+                    searchDesc: '兰蔻小黑瓶精华，76%二裂酵母浓度，28天淡化细纹，敏感肌适用',
+                    keywords: ['兰蔻小黑瓶', '二裂酵母', '抗老精华', '敏感肌护肤'],
+                    url: 'lancome.com/serum'
+                },
+                emotional: {
+                    headline: '每一次护肤，都是和未来的约会',
+                    sub: '让时间慢一点，让美丽久一点',
+                    desc: '镜子里的你，比去年多了一丝从容。不是因为皱纹少了，而是因为你学会了和自己和解。小黑瓶不是魔法，它只是帮你守住每一寸年轻。28天，给自己一个慢下来的理由。未来的你，会感谢现在的你。',
+                    points: ['守候年轻', '慢生活', '自我善待', '未来可期'],
+                    cta: '为自己留住',
+                    copy: '兰蔻小黑瓶精华\n\n【品牌故事】\n1935年，Armand Petitjean在法国创立兰蔻。\n他的信念是："美不是天赋，是选择。"\n\n2009年，兰蔻实验室发现二裂酵母的修护力。\n历经7年研发，小黑瓶精华诞生。\n它是兰蔻第一款精华，也是无数女性的第一瓶精华。\n\n【场景文案】\n晚上10点，卸完妆。\n镜子里的脸，疲惫但真实。\n你挤出两滴小黑瓶，指尖温热。\n从下巴向上，轻轻提拉。\n从鼻翼向耳际，缓缓推开。\n精华液很快消失，皮肤微微发亮。\n\n你想起妈妈说过的话：\n"女人最好的投资，是一瓶好精华。"\n你笑了。以前不懂，现在懂了。\n\n28天前，你拍下了第一张素颜照。\n28天后，你拍下了第二张。\n你没看出区别，但朋友说：\n"你最近气色很好。"\n\n小黑瓶不是魔法。\n它只是帮你守住每一寸年轻。\n就像你每天对镜子说的那句话：\n"慢慢来，我等你。"\n\n每一次护肤，都是和未来的约会。',
+                    searchDesc: '兰蔻小黑瓶精华，每一次护肤都是和未来的约会，让美丽久一点',
+                    keywords: ['兰蔻小黑瓶', '护肤仪式', '抗老精华', '女性关爱'],
+                    url: 'lancome.com/story'
+                },
+                promotional: {
+                    headline: '买50ml送50ml！等同5折',
+                    sub: '满780减100，赠小样三件套，会员积分双倍',
+                    desc: '买50ml正装送50ml等量小样，等同5折体验！叠加满780减100元优惠券，到手仅需680元享100ml。赠小样三件套（眼霜+面霜+洁面）。兰蔻会员积分双倍，可兑换正装。限本月！',
+                    points: ['买送等同5折', '满780减100', '赠小样三件', '积分双倍'],
+                    cta: '抢5折优惠',
+                    copy: '兰蔻小黑瓶精华\n\n【限时活动详情】\n活动时间：本月1日-月末\n\n活动一：买送等同5折\n- 购买50ml正装（780元）\n- 赠送50ml等量小样（5个10ml）\n- 等同100ml仅需780元\n- 相当于5折体验\n\n活动二：满减优惠券\n- 满780减100元（会员专享）\n- 叠加买送活动\n- 到手价680元享100ml\n\n活动三：赠品三件套\n- 赠兰蔻眼霜小样5ml\n- 赠兰蔻面霜小样5ml\n- 赠兰蔻洁面小样30ml\n- 总价值约260元\n\n活动四：积分双倍\n- 兰蔻会员购物积分x2\n- 780元订单获1560积分\n- 2000积分可兑换正装面霜\n\n【叠加规则】\n- 买送+满减可叠加\n- 买送+赠品可叠加\n- 买送+积分双倍可叠加\n- 以上四项均可同时享受\n\n到手680元享100ml精华+260元小样\n等同3.6折，本月仅此一次！',
+                    searchDesc: '兰蔻小黑瓶买50ml送50ml等同5折，满780减100，赠小样三件套',
+                    keywords: ['兰蔻小黑瓶优惠', '买一送一', '精华折扣', '护肤促销'],
+                    url: 'lancome.com/deal'
+                }
+            },
+            // Product 3: 农夫山泉天然水
+            {
+                rational: {
+                    headline: '水源地直取，含天然矿物质，pH7.3±0.5',
+                    sub: '通过ISO22000认证，全国销量连续15年领先',
+                    desc: '农夫山泉天然水源自千岛湖深层水源，含天然钾、钙、镁矿物质，pH值7.3±0.5弱碱性。通过ISO22000食品安全认证，水源地封闭管理，24小时实时监测。550ml瓶装全国销量连续15年领先。',
+                    points: ['千岛湖水源', '天然矿物质', 'pH7.3弱碱性', 'ISO22000认证'],
+                    cta: '了解水源',
+                    copy: '农夫山泉天然水 550ml\n\n【水源信息】\n- 水源地：浙江千岛湖（国家一级水源保护区）\n- 取水深度：水面下70米深层水\n- 水温：常年10-12°C\n- 水质：I类地表水标准\n\n【天然矿物质含量（每550ml）】\n- 钾（K+）：2.0-8.0 mg\n- 钙（Ca2+）：4.0-15.0 mg\n- 镁（Mg2+）：2.0-8.0 mg\n- 偏硅酸（H2SiO3）：10-30 mg\n- 溶解性总固体：50-180 mg\n- pH值：7.3 +/- 0.5（弱碱性）\n\n【安全认证】\n- ISO22000食品安全管理体系认证\n- HACCP体系认证\n- 水源地封闭管理，方圆50公里无工业污染\n- 24小时在线水质监测系统\n- 每批次留样检测，可追溯到具体水源\n\n【包装参数】\n- 瓶身材料：PET（不含BPA）\n- 瓶盖：HDPE食品级\n- 容量：550ml\n- 保质期：24个月\n- 可回收率：100%\n\n【销量数据】\n- 全国瓶装水市场占有率：连续15年前三\n- 550ml单品年销量：超50亿瓶\n- 消费者满意度：93.2%',
+                    searchDesc: '农夫山泉天然水，千岛湖水源地直取，含天然矿物质，pH7.3弱碱性',
+                    keywords: ['农夫山泉', '天然水', '矿物质水', '弱碱性水'],
+                    url: 'nongfuspring.com/water'
+                },
+                emotional: {
+                    headline: '每一口，都是大自然的味道',
+                    sub: '纯净如初，像回到山间的清晨',
+                    desc: '你喝过山间的溪水吗？小时候在外婆家，后山的泉眼旁，用手捧起就喝。清凉、甘甜、有一丝矿物质的涩。农夫山泉找的就是这个味道。我们不生产水，我们只是大自然的搬运工。',
+                    points: ['山间清泉', '童年记忆', '天然味道', '搬运自然'],
+                    cta: '品味自然',
+                    copy: '农夫山泉天然水 550ml\n\n【品牌宣言】\n我们不生产水\n我们只是大自然的搬运工\n\n【水源故事】\n千岛湖，位于浙江淳安。\n1078个岛屿，碧水连天。\n水面下70米，是我们要找的水。\n那里常年10°C，没有阳光。\n水从上游森林穿过几十年岩层。\n一路上，溶解了钾、钙、镁。\n来到取水口时，它已经准备好了一切。\n\n【场景文案】\n夏天。蝉鸣。\n你9岁。在外婆家过暑假。\n后山有个泉眼，你和小伙伴拿水壶去接。\n泉水冰凉，手都红了。\n你举起水壶就灌了一大口。\n甜的。是那种淡淡的甘甜。\n你觉得这是全世界最好喝的水。\n\n二十年后。\n你坐在写字楼32层。\n手边是一瓶农夫山泉。\n拧开瓶盖，喝一口。\n一样清凉，一样甘甜。\n你想起后山的蝉鸣。\n你想起外婆说"慢点喝，别呛着"。\n你笑了。\n\n农夫山泉，每一口都是大自然的味道。\n我们不生产水，我们只是大自然的搬运工。',
+                    searchDesc: '农夫山泉天然水，每一口都是大自然的味道，我们不生产水只是搬运工',
+                    keywords: ['农夫山泉', '天然水', '大自然', '搬运工'],
+                    url: 'nongfuspring.com/nature'
+                },
+                promotional: {
+                    headline: '整箱12瓶特惠9.9元！',
+                    sub: '订阅自动送水，首月5折，次月赠水杯',
+                    desc: '整箱12瓶（550ml）限时特惠9.9元！单瓶仅0.83元。订阅自动送水服务，首月5折，次月赠品牌水杯。年订用户每月多送2瓶，全年额外得24瓶。送货上门，不限楼层。',
+                    points: ['整箱9.9元', '单瓶0.83元', '订阅5折', '年订多送24瓶'],
+                    cta: '抢整箱特惠',
+                    copy: '农夫山泉天然水 550ml\n\n【限时活动详情】\n活动时间：今日00:00 - 23:59\n\n活动一：整箱特惠\n- 12瓶/箱（550ml/瓶）\n- 原价36元/箱\n- 限时9.9元/箱\n- 单瓶仅0.83元\n- 每人限购5箱\n\n活动二：订阅送水\n- 首月订阅5折优惠\n- 每月自动送12瓶到家\n- 原价36元/月，首月18元\n- 次月赠送品牌运动水杯（价值39元）\n- 可随时取消\n\n活动三：年订特权\n- 年付328元（约27.3元/月）\n- 每月送12瓶\n- 每月额外多送2瓶（全年多24瓶）\n- 全年到手168瓶\n- 等同单瓶1.95元\n\n活动四：配送保障\n- 送货上门，不限楼层\n- 当日下单次日达\n- 支持指定日期送达\n- 签收后7天无理由退换\n\n【搭配推荐】\n- 订阅+整箱特惠：首月9.9+18=27.9元享24瓶\n- 年订+首月5折：328-18=310元享168瓶\n\n今日限定，9.9元12瓶，错过等一年！',
+                    searchDesc: '农夫山泉天然水整箱12瓶特惠9.9元，单瓶0.83元，订阅首月5折',
+                    keywords: ['农夫山泉优惠', '矿泉水批发', '整箱特惠', '订水服务'],
+                    url: 'nongfuspring.com/deal'
+                }
+            }
+        ];
+
+        // Audience matching scores per tag per product (0-100)
+        var adMatchScores = {
+            '年轻女性': [92, 65, 98, 70],
+            '高收入': [75, 98, 95, 45],
+            '母婴人群': [55, 40, 88, 75],
+            '健身爱好者': [60, 70, 35, 95],
+            '美食达人': [88, 45, 50, 82],
+            '科技极客': [30, 99, 40, 35],
+            '时尚潮流': [85, 80, 92, 50],
+            '家庭主妇': [45, 35, 82, 90],
+            '学生群体': [78, 55, 40, 88],
+            '商务人士': [70, 92, 65, 50],
+            '环保主义': [50, 60, 55, 96],
+            '宠物主人': [55, 50, 60, 72]
+        };
+
+        function switchAdAngle(angle) {
+            currentAdAngle = angle;
+            document.querySelectorAll('.ad-angle-tab').forEach(function(tab) {
+                tab.classList.toggle('active', tab.getAttribute('data-angle') === angle);
+            });
+            if (currentAdResult) {
+                renderAdCreative(currentAdResult.product, currentAdResult.format, angle);
+            }
+        }
+
+        function generateAd() {
+            if (selectedAdTags.length === 0) { showToast('请至少选择1个标签', true); return; }
+            var pIdx = parseInt(document.getElementById('adProduct').value);
+            var format = document.getElementById('adFormat').value;
+            var product = adProductsData[pIdx];
+            currentAdResult = { product: product, format: format, pIdx: pIdx };
+            currentAdAngle = 'rational';
+            document.querySelectorAll('.ad-angle-tab').forEach(function(tab) {
+                tab.classList.toggle('active', tab.getAttribute('data-angle') === 'rational');
+            });
+            renderAdCreative(product, format, 'rational');
+            renderAudienceMatch(pIdx);
+            renderAdMetrics(pIdx, format);
+            renderAdCopyDetail(pIdx, 'rational');
+            document.getElementById('adResultPanel').style.display = 'block';
+            showToast('广告创意生成完成！切换创意角度查看不同方案');
+        }
+
+        function renderAdCreative(product, format, angle) {
+            var pIdx = adProductsData.indexOf(product);
+            var creative = adCreativeData[pIdx][angle];
+            var html = '';
+            if (format === 'feed') {
+                html = renderFeedAd(product, creative);
+            } else if (format === 'search') {
+                html = renderSearchAd(product, creative);
+            } else {
+                html = renderBannerAd(product, creative);
+            }
+            document.getElementById('adPreview').innerHTML = html;
+            renderAdCopyDetail(pIdx, angle);
+        }
+
+        function renderFeedAd(product, c) {
+            var discount = Math.round((1 - product.price / product.originalPrice) * 100);
+            return '<div class="ad-feed-card">' +
+                '<div class="ad-feed-visual" style="background:' + product.bg + '">' +
+                    '<div class="ad-feed-emoji">' + product.emoji + '</div>' +
+                    '<div style="position:absolute;top:10px;left:10px;z-index:2"><span class="ad-feed-badge" style="background:' + product.color + ';color:#fff">' + (discount > 0 ? discount + '% OFF' : 'HOT') + '</span></div>' +
+                '</div>' +
+                '<div class="ad-feed-content">' +
+                    '<div class="ad-feed-badge" style="background:rgba(255,255,255,.08);color:' + product.color + '">' + product.brand + '</div>' +
+                    '<div class="ad-feed-title">' + c.headline + '</div>' +
+                    '<div class="ad-feed-sub">' + c.sub + '</div>' +
+                    '<div class="ad-feed-points">' + c.points.map(function(p) { return '<span class="ad-feed-point">' + p + '</span>'; }).join('') + '</div>' +
+                    '<div class="ad-feed-bottom">' +
+                        '<div class="ad-feed-price" style="color:' + product.color + '">&#165;' + product.price + '<small>&#165;' + product.originalPrice + '</small></div>' +
+                        '<div class="ad-feed-cta" style="background:' + product.color + ';color:#fff">' + c.cta + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function renderSearchAd(product, c) {
+            var titleHtml = c.headline;
+            c.keywords.forEach(function(kw) {
+                titleHtml = titleHtml.split(kw).join('<b>' + kw + '</b>');
+            });
+            return '<div class="ad-search-card">' +
+                '<div style="padding:12px 16px">' +
+                    '<div style="margin-bottom:4px"><span class="ad-search-badge">广告</span><span class="ad-search-badge" style="background:' + product.color + ';color:#fff">' + product.brand + '</span></div>' +
+                    '<div class="ad-search-title">' + titleHtml + '</div>' +
+                    '<div class="ad-search-desc">' + c.searchDesc + '</div>' +
+                    '<div class="ad-search-meta">' + c.url + ' - ' + product.brand + '官方旗舰店</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function renderBannerAd(product, c) {
+            return '<div class="ad-banner-card">' +
+                '<div class="ad-banner-bg" style="background:' + product.bg + '"></div>' +
+                '<div class="ad-banner-content">' +
+                    '<div class="ad-banner-emoji">' + product.emoji + '</div>' +
+                    '<div class="ad-banner-text">' +
+                        '<div class="ad-banner-title">' + c.headline + '</div>' +
+                        '<div class="ad-banner-sub">' + c.sub + '</div>' +
+                        '<div style="display:flex;align-items:center;gap:12px">' +
+                            '<span class="ad-banner-cta" style="color:' + product.color + '">' + c.cta + '</span>' +
+                            '<span style="font-size:16px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3)">&#165;' + product.price + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function renderAudienceMatch(pIdx) {
+            var html = '<div class="ad-audience-title"><span style="font-size:16px">&#127919;</span> 标签匹配度分析</div>';
+            selectedAdTags.forEach(function(tag) {
+                var score = adMatchScores[tag] ? adMatchScores[tag][pIdx] : 50;
+                var color = score >= 80 ? '#1dd1a1' : score >= 60 ? '#feca57' : '#ff6b6b';
+                var level = score >= 80 ? '高匹配' : score >= 60 ? '中匹配' : '低匹配';
+                html += '<div class="ad-match-row"><span class="ad-match-tag">' + tag + '</span><span class="ad-match-score" style="color:' + color + '">' + level + ' ' + score + '%</span></div>';
+                html += '<div class="ad-match-bar"><div class="ad-match-fill" style="width:' + score + '%;background:' + color + '"></div></div>';
+            });
+            var avg = selectedAdTags.reduce(function(sum, tag) {
+                return sum + (adMatchScores[tag] ? adMatchScores[tag][pIdx] : 50);
+            }, 0) / selectedAdTags.length;
+            html += '<div style="margin-top:12px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.05);text-align:center;font-size:14px;font-weight:700">综合匹配度：<span style="color:' + (avg >= 80 ? '#1dd1a1' : avg >= 60 ? '#feca57' : '#ff6b6b') + ';font-size:18px">' + Math.round(avg) + '%</span></div>';
+            document.getElementById('adAudience').innerHTML = html;
+        }
+
+        function renderAdMetrics(pIdx, format) {
+            var baseCtr = format === 'feed' ? 3.5 : format === 'search' ? 5.2 : 2.1;
+            var baseCvr = format === 'feed' ? 1.8 : format === 'search' ? 3.5 : 0.9;
+            var avgMatch = selectedAdTags.reduce(function(sum, tag) {
+                return sum + (adMatchScores[tag] ? adMatchScores[tag][pIdx] : 50);
+            }, 0) / selectedAdTags.length;
+            var ctr = (baseCtr * (0.5 + avgMatch / 100)).toFixed(1);
+            var cvr = (baseCvr * (0.5 + avgMatch / 100)).toFixed(1);
+            var cpc = (1.2 + Math.random() * 0.8).toFixed(2);
+            var reach = (50 + Math.floor(Math.random() * 80)) + '万';
+            var metrics = [
+                { val: ctr + '%', label: '预估点击率', color: '#ff5990' },
+                { val: cvr + '%', label: '预估转化率', color: '#feca57' },
+                { val: '\u00a5' + cpc, label: '建议出价CPC', color: '#48dbfb' },
+                { val: reach, label: '预估触达量', color: '#1dd1a1' }
+            ];
+            var html = '<div class="ad-metrics">';
+            metrics.forEach(function(m) {
+                html += '<div class="ad-metric"><div class="ad-metric-val" style="color:' + m.color + '">' + m.val + '</div><div class="ad-metric-label">' + m.label + '</div></div>';
+            });
+            html += '</div>';
+            html += '<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,.4);line-height:1.6">基于' + selectedAdTags.length + '个标签的受众匹配度（综合' + Math.round(avgMatch) + '%）和' + (format === 'feed' ? '信息流' : format === 'search' ? '搜索' : '横幅') + '广告形式基准数据综合预测。实际效果以投放后数据为准。</div>';
+            document.getElementById('adMetrics').innerHTML = html;
+        }
+
+        function renderAdCopyDetail(pIdx, angle) {
+            var creative = adCreativeData[pIdx][angle];
+            var product = adProductsData[pIdx];
+            var html = '<div class="ad-copy-block">' +
+                '<div class="ad-copy-label">广告标题</div>' +
+                '<div class="ad-copy-text">' + creative.headline + '</div>' +
+                '<div class="ad-copy-label">副标题</div>' +
+                '<div class="ad-copy-text">' + creative.sub + '</div>' +
+                '<div class="ad-copy-label">广告描述</div>' +
+                '<div class="ad-copy-text">' + creative.desc + '</div>' +
+                '<div class="ad-copy-label">卖点提炼</div>' +
+                '<div class="ad-copy-text">' + creative.points.map(function(p, i) { return (i + 1) + '. ' + p; }).join('<br>') + '</div>' +
+                '<div class="ad-copy-label">CTA行动号召</div>' +
+                '<div class="ad-copy-text" style="color:' + product.color + ';font-weight:700">' + creative.cta + '</div>' +
+                '<div class="ad-copy-label">完整文案</div>' +
+                '<div class="ad-copy-text" style="white-space:pre-wrap">' + creative.copy + '</div>' +
+                '<div class="ad-copy-label">搜索关键词</div>' +
+                '<div class="ad-copy-text">' + creative.keywords.map(function(kw) { return '<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.08);margin-right:6px">' + kw + '</span>'; }).join('') + '</div>' +
+            '</div>';
+            document.getElementById('adCopyDetail').innerHTML = html;
+        }
+
+        // ==================== 5. Product Search ====================
+        var allProducts = [
+            /* 饮品 (10) */
+            { id: 1, name: '星巴克拿铁咖啡 350ml', price: 32, cat: '饮品', rating: 4.8, emoji: '\u2615', tag: '热销' },
+            { id: 2, name: '农夫山泉天然水 550ml', price: 2, cat: '饮品', rating: 4.9, emoji: '\uD83D\uDCA7', tag: '爆款' },
+            { id: 3, name: '可口可乐 330ml', price: 3, cat: '饮品', rating: 4.5, emoji: '\uD83E\uDD64', tag: '' },
+            { id: 4, name: '元气森林气泡水 500ml', price: 5, cat: '饮品', rating: 4.7, emoji: '\uD83D\uDCA7', tag: '新品' },
+            { id: 5, name: '喜茶多肉葡萄 500ml', price: 19, cat: '饮品', rating: 4.6, emoji: '\uD83C\uDF47', tag: '' },
+            { id: 6, name: '瑞幸生椰拿铁 350ml', price: 18, cat: '饮品', rating: 4.5, emoji: '\u2615', tag: '人气' },
+            { id: 7, name: '东鹏特饮 500ml', price: 5, cat: '饮品', rating: 4.4, emoji: '\uD83D\uDD0B', tag: '' },
+            { id: 8, name: '康师傅冰红茶 500ml', price: 3, cat: '饮品', rating: 4.3, emoji: '\uD83C\uDF75', tag: '' },
+            { id: 9, name: '依云矿泉水 500ml', price: 12, cat: '饮品', rating: 4.6, emoji: '\uD83D\uDCA7', tag: '进口' },
+            { id: 10, name: '王老吉凉茶 310ml', price: 4, cat: '饮品', rating: 4.4, emoji: '\uD83C\uDF75', tag: '' },
+            /* 零食 (10) */
+            { id: 11, name: '乐事薯片原味 104g', price: 8, cat: '零食', rating: 4.6, emoji: '\uD83C\uDF54', tag: '人气' },
+            { id: 12, name: '三只松鼠坚果礼盒', price: 68, cat: '零食', rating: 4.7, emoji: '\uD83E\uDD5C', tag: '礼盒' },
+            { id: 13, name: '良品铺子肉松饼', price: 15, cat: '零食', rating: 4.5, emoji: '\uD83C\uDF6B', tag: '' },
+            { id: 14, name: '卫龙辣条大面筋', price: 5, cat: '零食', rating: 4.6, emoji: '\uD83C\uDF36', tag: '爆款' },
+            { id: 15, name: '德福巧克力礼盒', price: 49, cat: '零食', rating: 4.7, emoji: '\uD83C\uDF6B', tag: '礼盒' },
+            { id: 16, name: '百草味每日坚果', price: 35, cat: '零食', rating: 4.5, emoji: '\uD83E\uDD5C', tag: '' },
+            { id: 17, name: '旺旺雪饼 400g', price: 18, cat: '零食', rating: 4.3, emoji: '\uD83C\uDF58', tag: '' },
+            { id: 18, name: '亿滋奥利奥饼干', price: 12, cat: '零食', rating: 4.4, emoji: '\uD83C\uDF6A', tag: '' },
+            { id: 19, name: '田园主义全麦面包', price: 22, cat: '零食', rating: 4.2, emoji: '\uD83C\uDF5E', tag: '健康' },
+            { id: 20, name: '良品铺子芒果干', price: 16, cat: '零食', rating: 4.5, emoji: '\uD83E\uDD6D', tag: '' },
+            /* 日化 (8) */
+            { id: 21, name: '舒肤佳沐浴露 400ml', price: 25, cat: '日化', rating: 4.7, emoji: '\uD83E\uDDFC', tag: '' },
+            { id: 22, name: '蓝月亮洗手液', price: 12, cat: '日化', rating: 4.3, emoji: '\uD83E\uDDF4', tag: '' },
+            { id: 23, name: '海飞丝洗发水 500ml', price: 39, cat: '日化', rating: 4.5, emoji: '\uD83E\uDDF4', tag: '' },
+            { id: 24, name: '高露洁牙膏 180g', price: 9, cat: '日化', rating: 4.4, emoji: '\uD83E\uDEA5', tag: '' },
+            { id: 25, name: '心相印抽纸 10包', price: 19, cat: '日化', rating: 4.6, emoji: '\uD83E\uDDFB', tag: '热销' },
+            { id: 26, name: '维达湿巾 80片', price: 8, cat: '日化', rating: 4.5, emoji: '\uD83E\uDDFB', tag: '' },
+            { id: 27, name: '舒客电动牙刷', price: 89, cat: '日化', rating: 4.4, emoji: '\uD83E\uDEA5', tag: '新品' },
+            { id: 28, name: '立白洗衣液 3kg', price: 35, cat: '日化', rating: 4.3, emoji: '\uD83E\uDDF4', tag: '' },
+            /* 数码 (10) */
+            { id: 29, name: '小米充电宝 10000mAh', price: 99, cat: '数码', rating: 4.5, emoji: '\uD83D\uDD0B', tag: '新品' },
+            { id: 30, name: '华为无线耳机 FreeBuds', price: 499, cat: '数码', rating: 4.6, emoji: '\uD83C\uDFA7', tag: '新品' },
+            { id: 31, name: 'Apple AirPods Pro 2', price: 1899, cat: '数码', rating: 4.9, emoji: '\uD83C\uDFA7', tag: '高端' },
+            { id: 32, name: '小米手环8', price: 249, cat: '数码', rating: 4.7, emoji: '\u231A', tag: '热销' },
+            { id: 33, name: 'Anker充电器 65W', price: 129, cat: '数码', rating: 4.6, emoji: '\uD83D\uDD0C', tag: '' },
+            { id: 34, name: '罗技无线鼠标', price: 79, cat: '数码', rating: 4.5, emoji: '\uD83D\uDDB1', tag: '' },
+            { id: 35, name: '绿联手机支架', price: 25, cat: '数码', rating: 4.4, emoji: '\uD83D\uDCF1', tag: '' },
+            { id: 36, name: '倍思车载充电器', price: 39, cat: '数码', rating: 4.3, emoji: '\uD83D\uDD0C', tag: '' },
+            { id: 37, name: '小米体脂秤', price: 59, cat: '数码', rating: 4.5, emoji: '\u2696', tag: '' },
+            { id: 38, name: '华为智能手表 GT4', price: 1488, cat: '数码', rating: 4.8, emoji: '\u231A', tag: '高端' },
+            /* 美妆 (8) */
+            { id: 39, name: '兰蔻小黑瓶精华 30ml', price: 780, cat: '美妆', rating: 4.9, emoji: '\uD83D\uDC8B', tag: '高端' },
+            { id: 40, name: '欧莱雅面霜 50ml', price: 159, cat: '美妆', rating: 4.4, emoji: '\uD83D\uDC81', tag: '' },
+            { id: 41, name: '雅诗兰黛小棕瓶 30ml', price: 980, cat: '美妆', rating: 4.8, emoji: '\uD83D\uDC8B', tag: '高端' },
+            { id: 42, name: 'SK-II神仙水 230ml', price: 1590, cat: '美妆', rating: 4.9, emoji: '\uD83D\uDCA7', tag: '奢华' },
+            { id: 43, name: '完美日记口红', price: 59, cat: '美妆', rating: 4.5, emoji: '\uD83D\uDC84', tag: '新品' },
+            { id: 44, name: '花西子蜜粉饼', price: 129, cat: '美妆', rating: 4.6, emoji: '\uD83D\uDC84', tag: '' },
+            { id: 45, name: '自然堂面膜 10片', price: 49, cat: '美妆', rating: 4.4, emoji: '\uD83E\uDDD6', tag: '' },
+            { id: 46, name: '百雀羚护肤套装', price: 199, cat: '美妆', rating: 4.3, emoji: '\uD83C\uDF38', tag: '' },
+            /* 生鲜 (6) */
+            { id: 47, name: '褚橙5kg礼盒装', price: 68, cat: '生鲜', rating: 4.8, emoji: '\uD83C\uDF4A', tag: '礼盒' },
+            { id: 48, name: '阳澄湖大闸蟹礼券', price: 298, cat: '生鲜', rating: 4.7, emoji: '\uD83E\uDD80', tag: '礼盒' },
+            { id: 49, name: '新疆阿克苏苹果 5kg', price: 45, cat: '生鲜', rating: 4.6, emoji: '\uD83C\uDF4E', tag: '' },
+            { id: 50, name: '海鲜鲜活1kg', price: 89, cat: '生鲜', rating: 4.5, emoji: '\uD83E\uDD90', tag: '' },
+            { id: 51, name: '五常稻花香大米5kg', price: 55, cat: '生鲜', rating: 4.7, emoji: '\uD83C\uDF3E', tag: '热销' },
+            { id: 52, name: '内蒙古牛肉干200g', price: 39, cat: '生鲜', rating: 4.4, emoji: '\uD83E\uDD69', tag: '' }
+        ];
+        var currentCat = 'all';
+        var currentPriceRange = 'all';
+
+        function initProductSearch() {
+            var cats = [['all','全部'],['饮品','饮品'],['零食','零食'],['日化','日化'],['数码','数码'],['美妆','美妆'],['生鲜','生鲜']];
+            var html = '';
+            cats.forEach(function(c) {
+                var count = c[0] === 'all' ? allProducts.length : allProducts.filter(function(p) { return p.cat === c[0]; }).length;
+                html += '<div class="filter-item' + (c[0] === 'all' ? ' active' : '') + '" onclick="setCategory(\'' + c[0] + '\',this)">' + c[1] + '<span class="count">' + count + '</span></div>';
+            });
+            document.getElementById('categoryFilter').innerHTML = html;
+
+            var ranges = [['all','全部'],['0-10','0-10元'],['10-50','10-50元'],['50-200','50-200元'],['200+','200元以上']];
+            html = '';
+            ranges.forEach(function(r) {
+                html += '<div class="filter-item' + (r[0] === 'all' ? ' active' : '') + '" onclick="setPriceRange(\'' + r[0] + '\',this)">' + r[1] + '</div>';
+            });
+            document.getElementById('priceFilter').innerHTML = html;
+            renderProducts();
+        }
+
+        function setCategory(cat, el) {
+            currentCat = cat;
+            document.querySelectorAll('#categoryFilter .filter-item').forEach(function(e) { e.classList.remove('active'); });
+            el.classList.add('active');
+            renderProducts();
+        }
+
+        function setPriceRange(range, el) {
+            currentPriceRange = range;
+            document.querySelectorAll('#priceFilter .filter-item').forEach(function(e) { e.classList.remove('active'); });
+            el.classList.add('active');
+            renderProducts();
+        }
+
+        function renderProducts() {
+            var keyword = document.getElementById('productSearchInput').value.toLowerCase().trim();
+            var filtered = allProducts.filter(function(p) {
+                if (keyword && p.name.toLowerCase().indexOf(keyword) === -1) return false;
+                if (currentCat !== 'all' && p.cat !== currentCat) return false;
+                if (currentPriceRange !== 'all') {
+                    if (currentPriceRange === '0-10' && (p.price < 0 || p.price > 10)) return false;
+                    if (currentPriceRange === '10-50' && (p.price < 10 || p.price > 50)) return false;
+                    if (currentPriceRange === '50-200' && (p.price < 50 || p.price > 200)) return false;
+                    if (currentPriceRange === '200+' && p.price < 200) return false;
+                }
+                return true;
+            });
+            var sortVal = document.getElementById('sortSelect').value;
+            if (sortVal === 'price-asc') filtered.sort(function(a,b) { return a.price - b.price; });
+            if (sortVal === 'price-desc') filtered.sort(function(a,b) { return b.price - a.price; });
+            if (sortVal === 'rating') filtered.sort(function(a,b) { return b.rating - a.rating; });
+
+            document.getElementById('productCount').textContent = '共 ' + filtered.length + ' 件商品';
+            var bgColors = { '饮品':'#48dbfb', '零食':'#feca57', '日化':'#1dd1a1', '数码':'#7c5fff', '美妆':'#ff5990', '生鲜':'#ff9f43' };
+            var html = '';
+            if (filtered.length === 0) {
+                html = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.3)">未找到匹配商品</div>';
+            } else {
+                filtered.forEach(function(p) {
+                    html += '<div class="product-card"><div class="product-img" style="background:' + (bgColors[p.cat] || '#5f7cf6') + '20">' + p.emoji + '</div><div class="product-info"><h4>' + p.name + '</h4><div class="p-price">&#165;' + p.price + '</div><div class="p-tag">' + p.cat + (p.tag ? ' | ' + p.tag : '') + '</div><div class="p-rating">\u2B50 ' + p.rating + '</div></div></div>';
+                });
+            }
+            document.getElementById('productGrid').innerHTML = html;
+
+            var recommends = allProducts.filter(function(p) { return p.rating >= 4.7 && filtered.indexOf(p) === -1; }).slice(0, 4);
+            if (recommends.length < 4) recommends = recommends.concat(allProducts.filter(function(p) { return filtered.indexOf(p) === -1; }).slice(0, 4 - recommends.length));
+            html = '';
+            recommends.forEach(function(p) {
+                html += '<div class="product-card"><div class="product-img" style="background:' + (bgColors[p.cat] || '#5f7cf6') + '20">' + p.emoji + '</div><div class="product-info"><h4>' + p.name + '</h4><div class="p-price">&#165;' + p.price + '</div><div class="p-tag">AI推荐</div><div class="p-rating">\u2B50 ' + p.rating + '</div></div></div>';
+            });
+            document.getElementById('recommendGrid').innerHTML = html;
+        }
+
+        // ==================== 6. Digital Employee ====================
+        var empTasks = [
+            { name: '订单自动审核', desc: '处理今日待审订单', icon: '\uD83D\uDCE6', status: 'running', progress: 65 },
+            { name: '库存监控预警', desc: '监控12家门店库存水位', icon: '\uD83D\uDCE6', status: 'running', progress: 40 },
+            { name: '客户答疑回复', desc: '自动回复客户咨询消息', icon: '\uD83D\uDCAC', status: 'done', progress: 100 },
+            { name: '门店巡检报告', desc: '生成每日门店巡检报告', icon: '\uD83D\uDCD0', status: 'done', progress: 100 },
+            { name: '销量预测分析', desc: '执行明日销量预测模型', icon: '\uD83D\uDCC8', status: 'pending', progress: 0 },
+            { name: '营销文案生成', desc: '为本周促销活动生成文案', icon: '\u270F', status: 'running', progress: 80 }
+        ];
+        var empLogs = [
+            { time: '21:50', text: '订单自动审核：已处理 156/240 单' },
+            { time: '21:35', text: '客户答疑：今日共回复 89 条咨询，满意度 96%' },
+            { time: '21:20', text: '门店巡检：3家门店完成巡检，1家需关注' },
+            { time: '21:00', text: '库存监控：中关村店农夫山泉库存预警' },
+            { time: '20:40', text: '营销文案：已完成 4/5 篇促销文案生成' },
+            { time: '20:20', text: '订单审核：启动今日第二批订单审核流程' },
+            { time: '20:00', text: '系统启动：数字员工小智上线，开始执行任务' }
+        ];
+
+        function initDigitalEmployee() {
+            var done = empTasks.filter(function(t) { return t.status === 'done'; }).length;
+            var running = empTasks.filter(function(t) { return t.status === 'running'; }).length;
+            document.getElementById('empTotalTasks').textContent = empTasks.length;
+            document.getElementById('empDoneTasks').textContent = done;
+            document.getElementById('empRunningTasks').textContent = running;
+
+            var colors = { running: '#48dbfb', done: '#1dd1a1', pending: 'rgba(255,255,255,.3)' };
+            var icons = { running: '\u2699', done: '\u2705', pending: '\u231B' };
+            var html = '';
+            empTasks.forEach(function(t) {
+                html += '<div class="task-list-item"><div class="task-icon" style="background:' + colors[t.status] + '20">' + t.icon + '</div><div class="task-info"><h5>' + t.name + '</h5><p>' + t.desc + '</p>';
+                if (t.status === 'running') {
+                    html += '<div style="margin-top:6px;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden"><div style="width:' + t.progress + '%;height:100%;background:' + colors[t.status] + ';border-radius:3px;transition:width .5s"></div></div>';
+                }
+                html += '</div><span class="task-status ' + t.status + '">' + icons[t.status] + ' ' + (t.status === 'running' ? '进行中 ' + t.progress + '%' : t.status === 'done' ? '已完成' : '待执行') + '</span></div>';
+            });
+            document.getElementById('empTaskList').innerHTML = html;
+
+            html = '';
+            empLogs.forEach(function(l) {
+                html += '<div class="store-list-item"><div style="flex:1"><span style="font-size:13px">' + l.text + '</span></div><span style="font-size:12px;color:rgba(255,255,255,.3)">' + l.time + '</span></div>';
+            });
+            document.getElementById('empWorkLog').innerHTML = html;
+        }
+
+        // ==================== 7. Customer Service ====================
+        var chatHistory = [];
+        var quickRepliesData = [
+            { text: '查询订单', reply: '请提供您的订单号，我来帮您查询。您也可以在我的订单页面查看所有订单状态。' },
+            { text: '退换货政策', reply: '我们支持7天无理由退换货。请保持商品及包装完好，在订单页点击申请退换即可，我们将在1-3个工作日内处理。' },
+            { text: '物流查询', reply: '您可以在订单详情页查看实时物流信息。正常情况下，下单后24小时内发货，3-5天送达。' },
+            { text: '优惠活动', reply: '本周活动：1) 全场满199减30；2) 新用户首单立减15元；3) 周三会员日双倍积分。请在结算时使用优惠券。' },
+            { text: '商品保修', reply: '电子产品享受1年免费保修，日用品支持30天质量问题的换货服务。请保留购买凭证。' },
+            { text: '联系人工', reply: '已为您转接人工客服，预计等待时间约2分钟。您也可以拨打客服热线：400-888-8888。' }
+        ];
+
+        function initCustomerService() {
+            chatHistory = [];
+            addChatMessage('bot', '您好！我是智能客服小慧 \uD83D\uDC4B 很高兴为您服务！请问有什么可以帮您的？');
+            renderQuickReplies();
+        }
+
+        function renderQuickReplies() {
+            var html = '';
+            quickRepliesData.forEach(function(q) {
+                html += '<div class="quick-reply" onclick="quickReply(\'' + q.text.replace(/'/g, "\\'") + '\')">' + q.text + '</div>';
+            });
+            document.getElementById('quickReplies').innerHTML = html;
+        }
+
+        function quickReply(text) {
+            document.getElementById('chatInput').value = text;
+            sendChatMessage();
+        }
+
+        function addChatMessage(sender, text) {
+            chatHistory.push({ sender: sender, text: text, time: new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) });
+            renderChatMessages();
+        }
+
+        function renderChatMessages() {
+            var html = '';
+            chatHistory.forEach(function(m) {
+                html += '<div class="msg ' + m.sender + '">' + m.text + '<div class="msg-time">' + m.time + '</div></div>';
+            });
+            var container = document.getElementById('chatMessages');
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendChatMessage() {
+            var input = document.getElementById('chatInput');
+            var text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            addChatMessage('user', text);
+            setTimeout(function() {
+                var reply = '';
+                var lower = text.toLowerCase();
+                if (lower.indexOf('订单') > -1 || lower.indexOf('查') > -1) {
+                    reply = '请提供您的订单号，我来帮您查询。您也可以在我的订单页面查看所有订单状态。';
+                } else if (lower.indexOf('退') > -1 || lower.indexOf('换') > -1) {
+                    reply = '我们支持7天无理由退换货。请保持商品及包装完好，在订单页点击申请退换即可。';
+                } else if (lower.indexOf('物流') > -1 || lower.indexOf('快递') > -1 || lower.indexOf('发货') > -1) {
+                    reply = '下单后24小时内发货，3-5天送达。您可以在订单详情页查看实时物流。';
+                } else if (lower.indexOf('优惠') > -1 || lower.indexOf('活动') > -1 || lower.indexOf('券') > -1) {
+                    reply = '本周活动：满199减30、新用户首单减15、周三会员日双倍积分。结算时自动使用优惠券。';
+                } else if (lower.indexOf('人工') > -1 || lower.indexOf('电话') > -1) {
+                    reply = '已为您转接人工客服，预计等待约2分钟。客服热线：400-888-8888。';
+                } else if (lower.indexOf('你好') > -1 || lower.indexOf('在吗') > -1 || lower.indexOf('hi') > -1 || lower.indexOf('hello') > -1) {
+                    reply = '您好！我在的，请问有什么可以帮您？\uD83D\uDE0A';
+                } else if (lower.indexOf('谢谢') > -1 || lower.indexOf('感谢') > -1) {
+                    reply = '不客气！很高兴能帮到您，还有其他问题随时找我哦！\uD83D\uDE0A';
+                } else {
+                    reply = '感谢您的提问！您的问题我已记录，正在为您处理中。如需紧急帮助，可拨打客服热线 400-888-8888 或转人工客服。';
+                }
+                addChatMessage('bot', reply);
+            }, 800);
+        }
+
+        // ==================== 8. Copywriting Video ====================
+        function generateCopywriting() {
+            var topic = document.getElementById('cwTopic').value.trim();
+            var type = document.getElementById('cwType').value;
+            var style = document.getElementById('cwStyle').value;
+            if (!topic) { showToast('请输入主题或商品名称', true); return; }
+            var styleNames = { vitality: '活力年轻', warm: '温馨治愈', professional: '专业商务', funny: '幽默搞怪' };
+            var html = '';
+
+            if (type === 'shortvideo') {
+                html = '<div class="panel"><div class="panel-title"><span class="dot" style="background:#ff7675"></span>短视频脚本</div><div class="result-box"><div class="result-content"><b>主题：</b>' + topic + ' | <b>风格：</b>' + styleNames[style] + ' | <b>时长：</b>30秒</b>\n\n<b>[0-5s] 开场Hook</b>\n画面：主角手持产品，特写镜头\n旁白：等等！你还在为' + topic + '发愁吗？\n\n<b>[5-15s] 痛点展示</b>\n画面：日常困扰场景快剪\n旁白：每次遇到这个问题，真的太头疼了...\n\n<b>[15-25s] 产品亮相对比</b>\n画面：产品使用前后对比，效果展示\n旁白：直到我发现了' + topic + '，一切都不一样了！\n\n<b>[25-30s] 转化引导</b>\n画面：产品特写+优惠信息\n旁白：点击下方链接，限时优惠，赶紧试试吧！\n</div></div></div>';
+            } else if (type === 'copywriting') {
+                var styleDesc = { vitality: '充满激情、年轻化表达', warm: '走心温暖、情感共鸣', professional: '专业权威、数据支撑', funny: '幽默风趣、反转创意' };
+                html = '<div class="panel"><div class="panel-title"><span class="dot" style="background:#ff7675"></span>营销文案</div><div class="result-box"><div class="result-content"><b>主题：</b>' + topic + ' | <b>风格：</b>' + styleNames[style] + '</b>\n\n<b>标题：</b>\n' + topic + '，让生活更简单的秘密武器\n\n<b>正文：</b>\n在这个快节奏的时代，我们都在寻找让生活更轻松的方式。\n\n' + topic + '，正是为此而生。\n\n它不仅仅是一个产品，更是一种生活方式的改变。从设计到功能，每一个细节都经过精心打磨，只为给你最好的体验。\n\n无论你是忙碌的上班族，还是追求品质的生活家，' + topic + '都能成为你的得力助手。\n\n<b>风格特点：</b>' + styleDesc[style] + '\n\n<b>结尾CTA：</b>\n现在就行动吧！限时优惠，首批用户专享8折，让' + topic + '成为你生活的一部分。\n</div></div></div>';
+            } else if (type === 'storyboard') {
+                var scenes = [
+                    { num: 1, desc: '全景城市/生活场景，交代背景', cam: '远景俯拍', dur: '3s' },
+                    { num: 2, desc: '主角面部特写，展现痛点情绪', cam: '近景正面', dur: '4s' },
+                    { num: 3, desc: '产品亮相，光线聚焦', cam: '特写', dur: '3s' },
+                    { num: 4, desc: '产品使用过程展示', cam: '中景跟拍', dur: '5s' },
+                    { num: 5, desc: '效果对比/满意表情', cam: '中近景', dur: '4s' },
+                    { num: 6, desc: '品牌Logo+优惠信息+CTA', cam: '定格海报', dur: '3s' }
+                ];
+                var sceneHtml = '';
+                scenes.forEach(function(s) {
+                    sceneHtml += '<div class="storyboard-item"><div class="storyboard-num" style="background:linear-gradient(135deg,#ff7675,#ff6348)">' + s.num + '</div><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:4px">分镜' + s.num + ' | ' + s.cam + ' | ' + s.dur + '</div><div style="font-size:13px;color:rgba(255,255,255,.6)">' + s.desc + ' (' + topic + ')</div></div></div>';
+                });
+                html = '<div class="panel"><div class="panel-title"><span class="dot" style="background:#ff7675"></span>视频分镜方案</div><div class="result-box"><div style="margin-bottom:12px;font-size:13px;color:rgba(255,255,255,.5)"><b>主题：</b>' + topic + ' | <b>风格：</b>' + styleNames[style] + ' | <b>总时长：</b>22秒 | <b>分镜数：</b>6</div>' + sceneHtml + '</div></div></div>';
+            } else {
+                var slogans = [
+                    topic + '，让简单成为习惯',
+                    '遇见' + topic + '，遇见更好的自己',
+                    topic + '，生活因你而不同',
+                    '选择' + topic + '，选择品质生活',
+                    '从' + topic + '开始，每一天都值得期待'
+                ];
+                var sloganHtml = slogans.map(function(s) { return '<div style="padding:12px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:8px;font-size:15px;font-weight:600">' + s + '</div>'; }).join('');
+                html = '<div class="panel"><div class="panel-title"><span class="dot" style="background:#ff7675"></span>广告Slogan</div><div class="result-box">' + sloganHtml + '<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:8px">已生成5条Slogan供选择</div></div></div>';
+            }
+            document.getElementById('cwResultPanel').innerHTML = html;
+            document.getElementById('cwResultPanel').style.display = 'block';
+            showToast('创作完成！');
+        }
+
+        // ==================== 9. Product Desc Gen ====================
+        function generateProductDesc() {
+            var name = document.getElementById('pdName').value.trim();
+            var points = document.getElementById('pdPoints').value.trim();
+            var audience = document.getElementById('pdAudience').value;
+            var price = document.getElementById('pdPrice').value.trim();
+            if (!name) { showToast('请输入商品名称', true); return; }
+            if (!points) { showToast('请输入核心卖点', true); return; }
+            var pointList = points.split(/[,，]/).map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+            var audienceNames = { young: '年轻科技爱好者', business: '商务人士', student: '学生群体', family: '家庭用户' };
+            var desc = '在快节奏的现代生活中，你需要一款真正懂你的产品。' + name + '，经过36道工序精心打造，只为给你带来超越期待的体验。无论是日常使用还是特殊场景，它都能轻松应对，成为你生活中不可或缺的伙伴。';
+            var seoDesc = name + ' - 专为' + audienceNames[audience] + '设计' + (price ? '，仅需' + price : '') + '。' + pointList.slice(0,3).join('、') + '，品质保障，限时优惠，立即购买享受专属折扣。';
+            var html = '<div class="panel"><div class="panel-title"><span class="dot" style="background:#55efc4"></span>生成结果</div><div class="generated-desc"><div class="desc-section"><h4>\uD83D\uDCDD 商品标题</h4><p style="font-size:16px;font-weight:700;color:#fff">' + name + (price ? ' ' + price : '') + '</p></div><div class="desc-section"><h4>\uD83C\uDFAF 核心卖点</h4>';
+            pointList.forEach(function(p) {
+                html += '<div class="selling-point"><span class="check">\u2713</span><span><b>' + p + '</b>：为您带来卓越的使用体验，满足您对品质的每一份期待。</span></div>';
+            });
+            html += '</div><div class="desc-section"><h4>\uD83D\uDCD0 详情文案</h4><p>' + desc + '</p></div><div class="desc-section"><h4>\uD83D\uDD0D SEO描述</h4><p style="font-size:13px;color:rgba(255,255,255,.5)">' + seoDesc + '</p></div><div class="desc-section"><h4>\uD83C\uDF1F 目标人群推荐</h4><p>本商品特别适合' + audienceNames[audience] + '，产品设计兼顾性能与体验，完美匹配您的需求场景。</p></div></div></div>';
+            document.getElementById('pdResultPanel').innerHTML = html;
+            document.getElementById('pdResultPanel').style.display = 'block';
+            showToast('商品介绍生成完成！');
+        }
+
+        // ==================== 10. Mini Shop ====================
+        var miniProductsData = [
+            { id: 1, name: '星巴克拿铁咖啡', price: 32, emoji: '\u2615', cat: '饮品' },
+            { id: 2, name: '农夫山泉天然水', price: 2, emoji: '\uD83D\uDCA7', cat: '饮品' },
+            { id: 3, name: '元气森林气泡水', price: 5, emoji: '\uD83D\uDCA7', cat: '饮品' },
+            { id: 4, name: '喜茶多肉葡萄', price: 19, emoji: '\uD83C\uDF47', cat: '饮品' },
+            { id: 5, name: '乐事薯片原味', price: 8, emoji: '\uD83C\uDF54', cat: '零食' },
+            { id: 6, name: '卫龙辣条大面筋', price: 5, emoji: '\uD83C\uDF36', cat: '零食' },
+            { id: 7, name: '三只松鼠坚果', price: 68, emoji: '\uD83E\uDD5C', cat: '零食' },
+            { id: 8, name: '德福巧克力礼盒', price: 49, emoji: '\uD83C\uDF6B', cat: '零食' },
+            { id: 9, name: '舒肤佳沐浴露', price: 25, emoji: '\uD83E\uDDFC', cat: '日化' },
+            { id: 10, name: '心相印抽纸', price: 19, emoji: '\uD83E\uDDFB', cat: '日化' },
+            { id: 11, name: '高露洁牙膏', price: 9, emoji: '\uD83E\uDEA5', cat: '日化' },
+            { id: 12, name: '小米充电宝', price: 99, emoji: '\uD83D\uDD0B', cat: '数码' },
+            { id: 13, name: '小米手环8', price: 249, emoji: '\u231A', cat: '数码' },
+            { id: 14, name: '华为无线耳机', price: 499, emoji: '\uD83C\uDFA7', cat: '数码' },
+            { id: 15, name: '罗技无线鼠标', price: 79, emoji: '\uD83D\uDDB1', cat: '数码' },
+            { id: 16, name: '兰蔻小黑瓶精华', price: 780, emoji: '\uD83D\uDC8B', cat: '美妆' },
+            { id: 17, name: '完美日记口红', price: 59, emoji: '\uD83D\uDC84', cat: '美妆' },
+            { id: 18, name: '自然堂面膜', price: 49, emoji: '\uD83E\uDDD6', cat: '美妆' },
+            { id: 19, name: '褚橙礼盒装', price: 68, emoji: '\uD83C\uDF4A', cat: '生鲜' },
+            { id: 20, name: '五常稻花香大米', price: 55, emoji: '\uD83C\uDF3E', cat: '生鲜' },
+            { id: 21, name: '阳澄湖大闸蟹', price: 298, emoji: '\uD83E\uDD80', cat: '生鲜' },
+            { id: 22, name: '内蒙古牛肉干', price: 39, emoji: '\uD83E\uDD69', cat: '生鲜' }
+        ];
+        var miniCart = {};
+        var miniOrders = [];
+
+        function initMiniShop() {
+            renderMiniProducts();
+            renderMiniOrders();
+        }
+
+        function renderMiniProducts() {
+            var catColors = { '饮品':'#48dbfb', '零食':'#feca57', '日化':'#1dd1a1', '数码':'#7c5fff', '美妆':'#ff5990', '生鲜':'#ff9f43' };
+            var cats = ['饮品','零食','日化','数码','美妆','生鲜'];
+            var filterHtml = '<div class="mini-cat-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="miniCatFilter">';
+            filterHtml += '<div class="filter-item active" style="font-size:11px;padding:4px 10px" onclick="filterMiniCat(\'all\',this)">全部<span class="count">' + miniProductsData.length + '</span></div>';
+            cats.forEach(function(c) {
+                var cnt = miniProductsData.filter(function(p) { return p.cat === c; }).length;
+                if (cnt > 0) filterHtml += '<div class="filter-item" style="font-size:11px;padding:4px 10px" onclick="filterMiniCat(\'' + c + '\',this)">' + c + '<span class="count">' + cnt + '</span></div>';
+            });
+            filterHtml += '</div>';
+            var html = filterHtml + '<div id="miniProductList"></div>';
+            document.getElementById('miniProducts').innerHTML = html;
+            renderMiniProductList('all');
+            updateMiniCart();
+        }
+
+        function renderMiniProductList(cat) {
+            var catColors = { '饮品':'#48dbfb', '零食':'#feca57', '日化':'#1dd1a1', '数码':'#7c5fff', '美妆':'#ff5990', '生鲜':'#ff9f43' };
+            var list = cat === 'all' ? miniProductsData : miniProductsData.filter(function(p) { return p.cat === cat; });
+            var html = '';
+            if (list.length === 0) {
+                html = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3);font-size:13px">暂无商品</div>';
+            } else {
+                list.forEach(function(p) {
+                    var color = catColors[p.cat] || '#7c5fff';
+                    html += '<div class="mini-product"><div class="mp-img" style="background:' + color + '20">' + p.emoji + '</div><div class="mp-info" style="flex:1"><h5>' + p.name + '</h5><div style="font-size:10px;color:rgba(255,255,255,.4);margin-bottom:2px">' + p.cat + '</div><div class="mp-price">&#165;' + p.price + '</div></div><button class="btn btn-purple" style="padding:6px 12px;font-size:12px" onclick="addToCart(' + p.id + ')">加入</button></div>';
+                });
+            }
+            document.getElementById('miniProductList').innerHTML = html;
+        }
+
+        function filterMiniCat(cat, el) {
+            document.querySelectorAll('#miniCatFilter .filter-item').forEach(function(e) { e.classList.remove('active'); });
+            el.classList.add('active');
+            renderMiniProductList(cat);
+        }
+
+        function addToCart(id) {
+            miniCart[id] = (miniCart[id] || 0) + 1;
+            updateMiniCart();
+            showToast('已加入购物车');
+        }
+
+        function updateMiniCart() {
+            var count = 0, total = 0;
+            for (var id in miniCart) {
+                var p = miniProductsData.find(function(x) { return x.id === parseInt(id); });
+                count += miniCart[id];
+                total += p.price * miniCart[id];
+            }
+            document.getElementById('miniCartCount').innerHTML = '\uD83D\uDED2 购物车 (' + count + ')';
+            document.getElementById('miniCartTotal').innerHTML = '&#165;' + total;
+            document.getElementById('miniCheckoutBtn').disabled = count === 0;
+        }
+
+        function miniCheckout() {
+            var count = 0, total = 0, items = [];
+            for (var id in miniCart) {
+                var p = miniProductsData.find(function(x) { return x.id === parseInt(id); });
+                count += miniCart[id];
+                total += p.price * miniCart[id];
+                items.push({ name: p.name, qty: miniCart[id], price: p.price });
+            }
+            if (count === 0) return;
+            var orderId = 'ZX' + Date.now().toString().slice(-8);
+            miniOrders.unshift({ id: orderId, items: items, total: total, status: 'paid', time: new Date().toLocaleString('zh-CN') });
+            miniCart = {};
+            updateMiniCart();
+            renderMiniOrders();
+            showToast('下单成功！订单号 ' + orderId);
+        }
+
+        function renderMiniOrders() {
+            if (miniOrders.length === 0) {
+                document.getElementById('miniOrders').innerHTML = '<div style="text-align:center;padding:24px;color:rgba(255,255,255,.3)">暂无订单</div>';
+                return;
+            }
+            var statusNames = { paid: '已付款', shipped: '已发货', done: '已完成' };
+            var html = '';
+            miniOrders.forEach(function(o) {
+                var itemStr = o.items.map(function(i) { return i.name + ' x' + i.qty; }).join('，');
+                html += '<div class="appt-list-item"><div style="flex:1"><div style="font-size:13px;font-weight:600">订单 ' + o.id + '</div><div style="font-size:12px;color:rgba(255,255,255,.5)">' + itemStr + '</div><div style="font-size:12px;color:rgba(255,255,255,.3)">' + o.time + '</div></div><div style="text-align:right"><div style="font-size:15px;font-weight:800;color:#feca57">&#165;' + o.total + '</div><span class="appt-status confirmed">' + statusNames[o.status] + '</span></div></div>';
+            });
+            document.getElementById('miniOrders').innerHTML = html;
+        }
+
+        // ==================== 11. Appointment ====================
+        var calDate = new Date();
+        var selectedDate = null;
+        var selectedSlot = null;
+        var appointments = [];
+
+        function initAppointment() {
+            calDate = new Date();
+            selectedDate = null;
+            selectedSlot = null;
+            renderCalendar();
+            renderAppointments();
+            document.getElementById('timeSlotPanel').style.display = 'none';
+            document.getElementById('apptFormPanel').style.display = 'none';
+        }
+
+        function renderCalendar() {
+            var year = calDate.getFullYear();
+            var month = calDate.getMonth();
+            var monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+            document.getElementById('calMonthLabel').textContent = year + '年' + monthNames[month];
+            var firstDay = new Date(year, month, 1).getDay();
+            var daysInMonth = new Date(year, month + 1, 0).getDate();
+            var today = new Date();
+            var headers = ['日','一','二','三','四','五','六'];
+            var html = '';
+            headers.forEach(function(h) { html += '<div class="cal-header">' + h + '</div>'; });
+            for (var i = 0; i < firstDay; i++) { html += '<div class="cal-day disabled"></div>'; }
+            for (var d = 1; d <= daysInMonth; d++) {
+                var isPast = new Date(year, month, d) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                var isToday = year === today.getFullYear() && month === today.getMonth() && d === today.getDate();
+                var sel = selectedDate && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === d;
+                html += '<div class="cal-day' + (isPast ? ' disabled' : '') + (isToday ? ' today' : '') + (sel ? ' selected' : '') + '" ' + (isPast ? '' : 'onclick="selectDate(' + d + ')"') + '>' + d + '</div>';
+            }
+            document.getElementById('calendar').innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            calDate.setMonth(calDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function selectDate(day) {
+            calDate.setDate(day);
+            selectedDate = new Date(calDate);
+            renderCalendar();
+            var slots = ['09:00-10:00','10:00-11:00','11:00-12:00','13:00-14:00','14:00-15:00','15:00-16:00','16:00-17:00','17:00-18:00'];
+            var disabled = [2, 5];
+            var html = '';
+            slots.forEach(function(s, i) {
+                html += '<div class="time-slot' + (disabled.indexOf(i) > -1 ? ' disabled' : '') + '" ' + (disabled.indexOf(i) > -1 ? '' : 'onclick="selectSlot(\'' + s + '\',this)"') + '>' + s + (disabled.indexOf(i) > -1 ? ' (已满)' : '') + '</div>';
+            });
+            document.getElementById('timeSlots').innerHTML = html;
+            document.getElementById('timeSlotPanel').style.display = 'block';
+            document.getElementById('apptFormPanel').style.display = 'none';
+        }
+
+        function selectSlot(slot, el) {
+            selectedSlot = slot;
+            document.querySelectorAll('.time-slot').forEach(function(e) { e.classList.remove('selected'); });
+            el.classList.add('selected');
+            document.getElementById('apptFormPanel').style.display = 'block';
+        }
+
+        function confirmAppointment() {
+            var name = document.getElementById('apptName').value.trim();
+            var phone = document.getElementById('apptPhone').value.trim();
+            if (!name) { showToast('请输入姓名', true); return; }
+            if (!phone) { showToast('请输入手机号', true); return; }
+            if (!/^1\d{10}$/.test(phone)) { showToast('请输入正确的手机号', true); return; }
+            var dateStr = selectedDate.getFullYear() + '-' + (selectedDate.getMonth()+1) + '-' + selectedDate.getDate();
+            appointments.unshift({ id: 'YY' + Date.now().toString().slice(-8), name: name, phone: phone, date: dateStr, slot: selectedSlot, note: document.getElementById('apptNote').value.trim(), status: 'confirmed' });
+            document.getElementById('apptName').value = '';
+            document.getElementById('apptPhone').value = '';
+            document.getElementById('apptNote').value = '';
+            document.getElementById('apptFormPanel').style.display = 'none';
+            document.getElementById('timeSlotPanel').style.display = 'none';
+            selectedDate = null;
+            selectedSlot = null;
+            renderCalendar();
+            renderAppointments();
+            showToast('预约成功！请按时到店');
+        }
+
+        function renderAppointments() {
+            if (appointments.length === 0) {
+                document.getElementById('apptList').innerHTML = '<div style="text-align:center;padding:24px;color:rgba(255,255,255,.3)">暂无预约记录</div>';
+                return;
+            }
+            var html = '';
+            appointments.forEach(function(a) {
+                html += '<div class="appt-list-item"><div style="flex:1"><div style="font-size:13px;font-weight:600">' + a.date + ' ' + a.slot + '</div><div style="font-size:12px;color:rgba(255,255,255,.5)">' + a.name + ' | ' + a.phone + (a.note ? ' | ' + a.note : '') + '</div></div><span class="appt-status ' + a.status + '">' + (a.status === 'confirmed' ? '已确认' : '待确认') + '</span></div>';
+            });
+            document.getElementById('apptList').innerHTML = html;
+        }
+
+        // ==================== 12. Life Service ====================
+        var services = [
+            { id: 'food', name: '餐饮外卖', emoji: '\uD83C\uDF55', desc: '美食送到家' },
+            { id: 'clean', name: '家政保洁', emoji: '\uD83E\uDDFB', desc: '专业清洁服务' },
+            { id: 'repair', name: '维修服务', emoji: '\uD83D\uDD27', desc: '家电水电维修' },
+            { id: 'beauty', name: '美容美发', emoji: '\uD83D\uDC87', desc: '上门美容美发' },
+            { id: 'delivery', name: '跑腿代购', emoji: '\uD83D\uDEB6', desc: '帮买帮送' },
+            { id: 'pet', name: '宠物服务', emoji: '\uD83D\uDC36', desc: '宠物洗护寄养' },
+            { id: 'move', name: '搬家服务', emoji: '\uD83D\uDE9A', desc: '专业搬家公司' },
+            { id: 'health', name: '健康服务', emoji: '\uD83E\uDE7A', desc: '上门体检护理' }
+        ];
+        var selectedService = null;
+        var serviceOrders = [];
+
+        function initLifeService() {
+            var colors = ['#ff6b6b','#1dd1a1','#48dbfb','#ff5990','#feca57','#7c5fff','#ff7675','#55efc4'];
+            var html = '';
+            services.forEach(function(s, i) {
+                html += '<div class="service-card" onclick="selectService(\'' + s.id + '\',\'' + s.name + '\',this)"><div class="service-icon" style="background:' + colors[i%colors.length] + '20">' + s.emoji + '</div><h4>' + s.name + '</h4><p>' + s.desc + '</p></div>';
+            });
+            document.getElementById('serviceGrid').innerHTML = html;
+            renderServiceOrders();
+        }
+
+        function selectService(id, name, el) {
+            selectedService = { id: id, name: name };
+            document.querySelectorAll('.service-card').forEach(function(e) { e.classList.remove('selected'); });
+            el.classList.add('selected');
+            document.getElementById('serviceOrderPanel').style.display = 'block';
+            document.getElementById('serviceDesc').placeholder = '描述您的' + name + '需求...';
+        }
+
+        function submitServiceOrder() {
+            var desc = document.getElementById('serviceDesc').value.trim();
+            var addr = document.getElementById('serviceAddr').value.trim();
+            var time = document.getElementById('serviceTime').value.trim();
+            if (!desc) { showToast('请描述您的需求', true); return; }
+            if (!addr) { showToast('请填写地址', true); return; }
+            var orderId = 'SH' + Date.now().toString().slice(-8);
+            serviceOrders.unshift({ id: orderId, service: selectedService.name, desc: desc, addr: addr, time: time, step: 0 });
+            document.getElementById('serviceDesc').value = '';
+            document.getElementById('serviceAddr').value = '';
+            document.getElementById('serviceTime').value = '';
+            showToast('下单成功！订单号 ' + orderId);
+            renderServiceOrders();
+            simulateServiceProgress(orderId);
+        }
+
+        function renderServiceOrders() {
+            if (serviceOrders.length === 0) {
+                document.getElementById('serviceTrackPanel').style.display = 'none';
+                return;
+            }
+            document.getElementById('serviceTrackPanel').style.display = 'block';
+            var steps = ['已接单','服务中','已完成'];
+            var icons = ['\u2705','\u2699','\uD83C\uDF89'];
+            var html = '';
+            serviceOrders.forEach(function(o) {
+                html += '<div style="margin-bottom:20px;padding:16px;background:rgba(255,255,255,.03);border-radius:12px"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:14px;font-weight:600">' + o.service + ' - ' + o.id + '</div><div style="font-size:12px;color:rgba(255,255,255,.4)">' + o.desc + ' | ' + o.addr + (o.time ? ' | ' + o.time : '') + '</div></div></div><div style="display:flex;gap:4px">';
+                steps.forEach(function(s, i) {
+                    var isActive = i === o.step;
+                    var isDone = i < o.step;
+                    html += '<div class="track-step' + (isActive ? ' active' : '') + (isDone ? ' done' : '') + '"><div class="step-dot">' + (isDone ? '\u2713' : icons[i]) + '</div><div class="step-label">' + s + '</div>';
+                    if (i < steps.length-1) html += '<div class="track-line" style="' + (isDone ? 'background:rgba(29,209,161,.3)' : '') + '"></div>';
+                    html += '</div>';
+                });
+                html += '</div></div>';
+            });
+            document.getElementById('serviceTrack').innerHTML = html;
+        }
+
+        function simulateServiceProgress(orderId) {
+            var order = serviceOrders.find(function(o) { return o.id === orderId; });
+            if (!order) return;
+            setTimeout(function() {
+                order.step = 1;
+                renderServiceOrders();
+            }, 3000);
+            setTimeout(function() {
+                order.step = 2;
+                renderServiceOrders();
+                showToast('服务已完成！');
+            }, 6000);
+        }
+    </script>
+</body>
+</html>
