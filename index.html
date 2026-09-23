@@ -1223,11 +1223,11 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
 
     <!-- Quick Actions -->
     <div class="mwb-quick-actions" id="mwbQuickActions">
-      <div class="mwb-quick-btn primary" id="qa-agent" onclick="switchSection('agent')">
+      <div class="mwb-quick-btn primary" id="qa-agent">
         <div class="icon">🤖</div>
         <div class="label">AI助手</div>
       </div>
-      <div class="mwb-quick-btn accent" id="qa-chatbi" onclick="switchSection('chatbi')">
+      <div class="mwb-quick-btn accent" id="qa-chatbi">
         <div class="icon">📊</div>
         <div class="label">ChatBI</div>
       </div>
@@ -1244,7 +1244,7 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
     <!-- Smart Store Dashboard -->
     <div class="mwb-section-title">
       <span>🏬 智慧门店看板</span>
-      <span class="more" onclick="switchSection('chatbi')">深度分析 →</span>
+      <span class="more">深度分析 →</span>
     </div>
     <div class="mwb-mini-grid">
       <div class="mwb-mini-card">
@@ -1436,8 +1436,7 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
     </div>
   </div>
 
-  <!-- Floating Agent Button -->
-  <button class="mwb-agent-float" onclick="switchSection('agent')" title="AI智能体对话">🤖</button>
+  <!-- Floating Agent Button removed - section must stay pure -->
 </section>
 
 <!-- OMO Section -->
@@ -1523,10 +1522,6 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
         </div>
       </div>
     </div>
-  </div>
-  <div style="text-align:center;margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-    <button onclick="switchSection('consumer')" style="padding:10px 28px;background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 20px rgba(54,207,201,0.3)">&#x1F6D2; 体验消费者商城</button>
-    <button onclick="switchSection('home')" style="padding:10px 28px;background:rgba(22,93,255,0.06);color:var(--primary);border:1.5px solid rgba(22,93,255,0.2);border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s">&#x1F3E0; 返回首页</button>
   </div>
 </section>
 
@@ -1830,9 +1825,6 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
     <div class="card reveal"><div class="icon-box">&#x1F6D2;</div><h3>电商小程序</h3><p>完整购物流程、购物车管理、订单追踪、在线支付</p></div>
     <div class="card reveal"><div class="icon-box">&#x1F4C5;</div><h3>在线预约系统</h3><p>日历预约、时段管理、服务分类、预约记录</p></div>
     <div class="card reveal"><div class="icon-box">&#x1F3E0;</div><h3>生活服务</h3><p>家政、维修、美容、跑腿、宠物、搬家、健康服务</p></div>
-  </div>
-  <div style="text-align:center;margin-top:32px">
-    <button onclick="switchSection('home')" style="padding:10px 28px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 20px rgba(22,93,255,0.3)">&#x1F3E0; 返回首页</button>
   </div>
 </section>
 
