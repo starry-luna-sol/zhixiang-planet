@@ -797,7 +797,9 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
       </button>
     </div>
   </div>
-</section>
+</div>
+
+  </div>
 
 <!-- Data Cards -->
 <div class="data-row reveal">
@@ -851,6 +853,8 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
     </div>
   </div>
 </div>
+
+</section>
 
 <!-- Agent Section -->
 <section id="agent" style="display:none;max-width:none;padding:0;margin:0;width:100%">
@@ -1158,7 +1162,7 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
 </section>
 
 <!-- Merchant Workbench Section -->
-<section id="merchant" style="display:none">
+<section id="merchant" style="display:none;max-width:none;padding:0;margin:0;width:100%">
   <div class="mwb-container">
     <!-- Header -->
     <div class="mwb-header">
@@ -1810,7 +1814,7 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
 </section>
 
 <!-- Legacy Modules (hidden by default, accessible via deep links) -->
-<section class="section" id="legacy" style="display:none">
+<section class="section" id="legacy" style="display:none;max-width:none;padding:0;margin:0;width:100%">
   <div class="section-title">全部 12+ 功能模块</div>
   <div class="section-sub">原有 12 个场景已融入新架构，通过智能体协同统一调度</div>
   <div class="cards-grid">
@@ -1882,18 +1886,15 @@ function applyRoleView(){
 let currentSection='home';
 function switchSection(section){
   currentSection=section;
-  document.querySelectorAll('.section').forEach(s=>s.style.display='none');
-  // When showing home, also show core/omo/legacy as they are part of the homepage content
-  const homeGroup=['home','core','omo','legacy'];
-  if(homeGroup.includes(section)){
-    homeGroup.forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.style.display='block';
-    });
-  } else {
-    const target=document.getElementById(section);
-    if(target)target.style.display='block';
-  }
+  // Hide ALL sections by ID to ensure sections without class="section" are also hidden
+  const allSections = ['home','core','omo','legacy','agent','chatbi','risk','merchant','consumer','dashboard'];
+  allSections.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  // Show target section only
+  const target=document.getElementById(section);
+  if(target)target.style.display='block';
   document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
   document.querySelector(`.nav-link[data-section="${section}"]`)?.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
