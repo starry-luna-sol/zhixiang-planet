@@ -73,7 +73,9 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
 @keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-30px)}}
 .hero-content{position:relative;z-index:2;max-width:900px;margin:0 auto;text-align:center}
 .hero-badge{display:inline-block;padding:6px 18px;background:rgba(22,93,255,0.1);border:1px solid rgba(22,93,255,0.2);border-radius:100px;font-size:13px;color:var(--primary);font-weight:600;margin-bottom:20px;backdrop-filter:blur(10px)}
-.hero h1{font-size:clamp(32px,5vw,56px);font-weight:800;line-height:1.2;margin-bottom:16px;color:var(--text-main)}
+.hero h1{font-weight:800;line-height:1.2;margin-bottom:16px;color:var(--text-main)}
+.hero-title-main{font-size:clamp(48px,7vw,72px);display:block;margin-bottom:8px}
+.hero-title-sub{font-size:clamp(24px,3.5vw,40px);display:block;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:clamp(16px,2.5vw,22px);color:var(--text-secondary);margin-bottom:12px;line-height:1.5}
 .hero-desc{font-size:14px;color:var(--text-muted);max-width:650px;margin:0 auto;line-height:1.8}
@@ -778,8 +780,10 @@ body{font-family:var(--font);background:var(--bg-body);color:var(--text-main);ov
     <div class="hero-orb orb-3"></div>
   </div>
   <div class="hero-content">
-    <div class="hero-badge">&#x1F3C6; 参赛方案 · 零售多Agent智能协同平台</div>
-    <h1>智星商联 <span>零售多 Agent 智能协同平台</span></h1>
+    <h1 class="hero-title">
+      <div class="hero-title-main">智星商联</div>
+      <div class="hero-title-sub">零售多 Agent 智能协同平台</div>
+    </h1>
     <div class="hero-sub">中小商家一站式 AI 数字化经营助手</div>
     <p class="hero-desc">面向中小连锁门店、个体零售商家的 B2B2C 小程序平台。以多 Agent 智能体为核心，打通线下门店、线上电商、营销投放、库存供应链、消费者服务、经营风险预警全链路。解决中小商家痛点：缺少专业数据分析人才、营销物料产出成本高、库存积压缺货、客服人力不足、线上线下数据割裂。一套小程序同时支持商家工作台、消费者端、总部监管大屏，实现"经营→分析→决策→营销→交易→复盘"完整闭环。</p>
     <div class="hero-cta">
