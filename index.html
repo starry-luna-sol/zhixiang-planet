@@ -2036,7 +2036,7 @@ function showCollaborationSummary(steps){
     const div=document.createElement('div');
     div.className='agent-msg bot';
     div.style.animation='msgIn 0.6s ease-out';
-    div.innerHTML=`<div class="msg-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:14px">&#x1F3AF;</div><div class="msg-bubble"><div style="font-weight:700;color:var(--primary);margin-bottom:12px;font-size:15px">&#x2705; 5大智能体协同方案已生成完毕</div><div style="font-size:12px;color:var(--text-secondary);line-height:1.8;margin-bottom:14px">&#x1F4CA; <strong>经营诊断</strong>：精准定位问题根源（转化率/客流/库存/客服）<br>&#x1F4E6; <strong>库存调配</strong>：具体调货量+补货建议+参数调整<br>&#x270D;&#xFE0F; <strong>营销物料</strong>：文案+脚本+海报全套输出+投放策略<br>&#x26A0; <strong>风险扫描</strong>：合规审核+预警排查+等级评估<br>&#x1F9D1;&#x200D;&#x1F4BC; <strong>执行落地</strong>：自动创建工单+负责人通知+效果追踪</div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px"><button onclick="alert('&#x2705; 完整方案已复制到剪贴板！')" style="padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s">&#x1F4CB; 复制方案</button><button onclick="alert('&#x2705; 工单已推送给相关负责人！')" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s">&#x1F4E4; 下发执行</button><button onclick="switchSection('chatbi')" style="padding:8px 16px;background:rgba(22,93,255,0.08);color:var(--primary);border:1px solid var(--primary);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s">&#x1F4CA; ChatBI 深度分析</button><button onclick="switchSection('risk')" style="padding:8px 16px;background:rgba(255,77,79,0.08);color:var(--danger);border:1px solid var(--danger);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s">&#x26A0; 查看风险详情</button></div></div>`;
+    div.innerHTML=`<div class="msg-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:14px">&#x1F3AF;</div><div class="msg-bubble"><div style="font-weight:700;color:var(--primary);margin-bottom:12px;font-size:15px">&#x2705; 5大智能体协同方案已生成完毕</div><div style="font-size:12px;color:var(--text-secondary);line-height:1.8;margin-bottom:14px">&#x1F4CA; <strong>经营诊断</strong>：精准定位问题根源（转化率/客流/库存/客服）<br>&#x1F4E6; <strong>库存调配</strong>：具体调货量+补货建议+参数调整<br>&#x270D;&#xFE0F; <strong>营销物料</strong>：文案+脚本+海报全套输出+投放策略<br>&#x26A0; <strong>风险扫描</strong>：合规审核+预警排查+等级评估<br>&#x1F9D1;&#x200D;&#x1F4BC; <strong>执行落地</strong>：自动创建工单+负责人通知+效果追踪</div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px"><button onclick="alert('&#x2705; 完整方案已复制到剪贴板！')" style="padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s">&#x1F4CB; 复制方案</button><button onclick="alert('&#x2705; 工单已推送给相关负责人！')" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s">&#x1F4E4; 下发执行</button></div></div>`;
     agentBody.appendChild(div);
     agentBody.scrollTop=agentBody.scrollHeight;
 }
@@ -2590,14 +2590,11 @@ function mwbOpenModule(key){
     return;
   }
   switch(key){
-    case 'agent': switchSection('agent'); break;
-    case 'chatbi': switchSection('chatbi'); break;
     case 'marketing': mwbOpenMarketing(); break;
     case 'inventory': mwbOpenInventory(); break;
     case 'staff': mwbOpenStaff(); break;
     case 'shop': mwbOpenShop(); break;
     case 'appointment': mwbOpenAppointment(); break;
-    case 'risk': switchSection('risk'); break;
   }
 }
 
